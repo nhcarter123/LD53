@@ -222,3 +222,11 @@ function merge(table1, table2)
 
   return merged
 end
+
+function removeEl(tbl, el)
+  for i = 1, #tbl do
+    if tbl[i] == el then
+      return table.remove(tbl, i)
+    end
+  end
+end
