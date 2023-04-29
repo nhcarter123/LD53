@@ -1,11 +1,22 @@
 return {
     create = function(x, y, floor)
       return {
+        img = HALLWAY_IMAGE,
         x = x,
         y = y,
         doorX = x / 2,
         aliens = {},
         floor = floor,
+
+        init = function(self)
+          if self.color == 'green' then
+            self.img = HALLWAY_G_IMAGE
+          elseif self.color == 'yellow' then
+            self.img = HALLWAY_Y_IMAGE
+          elseif self.color == 'purple' then
+            self.img = HALLWAY_P_IMAGE
+          end
+        end,
 
         addAlien = function(self)
           local constructor = Alien1
@@ -13,7 +24,7 @@ return {
             constructor = Alien2
           end
 
-          local alien = constructor.create(self.x, self.y)
+          local alien = constructor.create(self.x * 2, self.y)
           alien.hallway = self
           alien.targetFloor = math.random(1, FLOOR_COUNT)
           alien.targetSide = 'left'
@@ -32,7 +43,7 @@ return {
         end,
 
         draw = function(self)
-          love.graphics.draw(HALLWAY_IMAGE, self.x, self.y, 0, 1, 1, 300, 200)
+          love.graphics.draw(self.img, self.x, self.y, 0, 1, 1, 300, 200)
         end,
       }
     end

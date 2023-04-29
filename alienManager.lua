@@ -1,7 +1,8 @@
 return {
     aliens = {},
-    spawnCount = 0,
-    spawnInterval = 4,
+    spawnCount = 999,
+    spawnInterval = 2,
+    --differ
 
     update = function(self, dt)
       self.spawnCount = self.spawnCount + dt
@@ -9,14 +10,8 @@ return {
       if self.spawnCount > self.spawnInterval then
         self.spawnCount = 0
 
-        local randomFloor = math.random(1, FLOOR_COUNT)
-
-        local side = 'left'
-        if math.random() < 0.5 then
-          side = 'right'
-        end
-
-        HallwayManager.floors[randomFloor][side]:addAlien()
+        local targetHallway = self.entryPoints[math.random(#self.entryPoints)]
+        targetHallway:addAlien()
       end
 
       for i = 1, #self.aliens do

@@ -1,16 +1,54 @@
 return {
     floors = {},
 
-    init = function(self, floorCount)
+    init = function(self)
       local spacingX = 500
 
-      for i = 1, floorCount do
+      local availableHallways = {}
+
+      --- instantiate
+      for i = 1, FLOOR_COUNT do
         local yOffset = -HALLWAY_HEIGHT * (i - 1)
+        local left = Hallway.create(-spacingX, yOffset, i)
+        local right = Hallway.create(spacingX, yOffset, i)
 
         self.floors[i] = {
-          left = Hallway.create(-spacingX, yOffset, i),
-          right = Hallway.create(spacingX, yOffset, i),
+          left = left,
+          right = right,
         }
+        table.insert(availableHallways, left)
+        table.insert(availableHallways, right)
+      end
+
+      local exitColors = {
+        'green',
+        'green',
+        'yellow',
+        'yellow',
+        'purple',
+        'purple',
+      }
+
+      shuffle(availableHallways)
+
+      for i = 1, #exitColors do
+        local targetHallway = table.remove(availableHallways, #availableHallways)
+
+        local side = 'right'
+        if math.random() > 0.5 then
+          side = 'left'
+        end
+
+        targetHallway.isExit = true
+        targetHallway.color = exitColors[i]
+      end
+
+      AlienManager.entryPoints = availableHallways
+
+      --- initialize
+      for i = 1, FLOOR_COUNT do
+        self.floors[i].left:init()
+        self.floors[i].right:init()
       end
     end,
 

@@ -6,6 +6,7 @@ Alien1 = require("unit/alien1")
 Alien2 = require("unit/alien2")
 AlienManager = require("alienManager")
 HallwayManager = require("hallwayManager")
+BehaviorManager = require("behaviorManager")
 Hallway = require("hallway")
 
 time = 0
@@ -77,9 +78,9 @@ end
 function love.mousereleased(x, y, button, istouch)
 end
 
-HEIGHT = 0
-FLOOR_COUNT = 6
+FLOOR_COUNT = 10
 HALLWAY_HEIGHT = 190
+--PAUSED = true
 
 function love.load()
   --math.randomseed(os.time())
@@ -99,21 +100,29 @@ function love.load()
 
   ---- Units
   HALLWAY_IMAGE = love.graphics.newImage("resources/images/hallway.png")
+  HALLWAY_G_IMAGE = love.graphics.newImage("resources/images/hallway_g.png")
+  HALLWAY_Y_IMAGE = love.graphics.newImage("resources/images/hallway_y.png")
+  HALLWAY_P_IMAGE = love.graphics.newImage("resources/images/hallway_p.png")
   ALIEN1_IMAGE = love.graphics.newImage("resources/images/alien1.png")
   ALIEN2_IMAGE = love.graphics.newImage("resources/images/alien2.png")
+  ALIEN3_IMAGE = love.graphics.newImage("resources/images/alien3.png")
   ELEVATOR_IMAGE = love.graphics.newImage("resources/images/elevator_back.png")
   DIR_IMAGE = love.graphics.newImage("resources/images/dir.png")
+  HAPPY_IMAGE = love.graphics.newImage("resources/images/happy.png")
+  BEMUSED_IMAGE = love.graphics.newImage("resources/images/bemused.png")
+  ANGRY_IMAGE = love.graphics.newImage("resources/images/angry.png")
+  UI_PANEL_IMAGE = love.graphics.newImage("resources/images/ui_panel.png")
 
   ELEVATOR = Player.create(0, 0)
 
-  HallwayManager:init(FLOOR_COUNT)
+  HallwayManager:init()
 
-  HallwayManager.floors[1].left:addAlien()
-  HallwayManager.floors[2].left:addAlien()
-  HallwayManager.floors[3].left:addAlien()
-  HallwayManager.floors[4].left:addAlien()
-  HallwayManager.floors[2].right:addAlien()
-  HallwayManager.floors[4].right:addAlien()
+  --HallwayManager.floors[1].left:addAlien()
+  --HallwayManager.floors[2].left:addAlien()
+  --HallwayManager.floors[3].left:addAlien()
+  --HallwayManager.floors[4].left:addAlien()
+  --HallwayManager.floors[2].right:addAlien()
+  --HallwayManager.floors[4].right:addAlien()
 
   --table.insert(AlienManager.aliens, Alien.create(-300, 0))
   --table.insert(AlienManager.aliens, Alien.create(-350, 0))
@@ -125,45 +134,37 @@ end
 function love.update(dt)
   time = time + dt
 
-  local ceilingHeight = -FLOOR_COUNT * HALLWAY_HEIGHT
+  if not PAUSED then
+    local ceilingHeight = -FLOOR_COUNT * HALLWAY_HEIGHT
 
-  local xVel = 0
-  --if A_IS_DOWN then
-  --  xVel = -1
-  --end
-  --if D_IS_DOWN then
-  --  xVel = 1
-  --end
+    local yVel = 0
+    if W_IS_DOWN then
+      yVel = -1
+    end
+    if S_IS_DOWN then
+      yVel = 1
+    end
 
-  local yVel = 0
-  if W_IS_DOWN then
-    yVel = -1
+    ELEVATOR:move(0, yVel)
+    ELEVATOR:update(dt, ceilingHeight, yVel == 0)
+
+    AlienManager:update(dt)
+    HallwayManager:update()
+
+    --DEBUG[2] = "Floor: " .. tostring(1 + round(-ELEVATOR.y / HALLWAY_HEIGHT))
+
+    --- Position the camera
+    local currentX, currentY = cam:getPosition()
+    local camX = lerp(currentX, ELEVATOR.x, 5 * dt)
+    local camY = lerp(currentY, ELEVATOR.y - 100, 5 * dt)
+    cam:setPosition(camX, camY)
+
+    --cam:setPosition(0, 0)
+
+    --for i = 1, 100 do
+    --  BALLS[i]:update()
+    --end
   end
-  if S_IS_DOWN then
-    yVel = 1
-  end
-
-  ELEVATOR:move(xVel, yVel)
-  ELEVATOR:update(dt, ceilingHeight, yVel == 0)
-
-  AlienManager:update(dt)
-  HallwayManager:update()
-
-  --DEBUG[2] = "Floor: " .. tostring(1 + round(-ELEVATOR.y / HALLWAY_HEIGHT))
-
-  --- Position the camera
-  local currentX, currentY = cam:getPosition()
-  local camX = lerp(currentX, ELEVATOR.x, 5 * dt)
-  local camY = lerp(currentY, ELEVATOR.y - 100, 5 * dt)
-  cam:setPosition(camX, camY)
-
-  --cam:setPosition(0, 0)
-
-  --for i = 1, 100 do
-  --  BALLS[i]:update()
-  --end
-
-  HEIGHT = HEIGHT + 0.3
 
   DEBUG[1] = "Current FPS: " .. tostring(love.timer.getFPS())
 end
@@ -180,30 +181,39 @@ end
 function love.draw()
   cam:draw(drawCameraStuff)
 
+  if PAUSED then
+    BehaviorManager:draw()
+  end
+
   --for i = 1, 100 do
   --  BALLS[i]:draw()
   --end
 
-  -- Draw a square
-  love.graphics.setColor(1, 1, 1)
+  -- Loves Falling
+  -- Loves/Hates other alien type
+  -- Loves/Hates crowds
+  -- Loves/Hates waiting
+
+
+  --love.graphics.rectangle('fill', WIDTH / 2, HEIGHT / 2, 400, 200)
+
   --love.graphics.rectangle("fill", 30, HEIGHT, 4, 4)
 
-  love.graphics.setColor(1, 1, 1)
   for i = 1, #DEBUG do
     love.graphics.print(DEBUG[i], love.graphics.getWidth() - 160, 10 + (i - 1) * 20)
   end
 end
 
-function drawHallways(floorCount)
-  local spacingX = 500
-
-  for i = 1, floorCount do
-    local yOffset = -HALLWAY_HEIGHT * (i - 1)
-    love.graphics.draw(HALLWAY_IMAGE, -spacingX, yOffset, 0, 1, 1, 300, 200)
-    love.graphics.draw(HALLWAY_IMAGE, spacingX, yOffset, 0, 1, 1, 300, 200)
-  end
-  --love.graphics.circle("fill", 0, 0, 10)
-end
+--function drawHallways(floorCount)
+--  local spacingX = 500
+--
+--  for i = 1, floorCount do
+--    local yOffset = -HALLWAY_HEIGHT * (i - 1)
+--    love.graphics.draw(HALLWAY_IMAGE, -spacingX, yOffset, 0, 1, 1, 300, 200)
+--    love.graphics.draw(HALLWAY_IMAGE, spacingX, yOffset, 0, 1, 1, 300, 200)
+--  end
+--  --love.graphics.circle("fill", 0, 0, 10)
+--end
 
 function _if(bool, func1, func2)
   if bool then return func1() else return func2() end

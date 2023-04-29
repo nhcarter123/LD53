@@ -24,7 +24,7 @@ return {
       --self.y = self.y + 0.2;
       --self.x = self.x + self.vx
 
-      self.y = self.y + self.vy * dt * 160
+      self.y = self.y + self.vy * dt * 120
       --self.vy = self.vy * 0.98
 
       --- Stop at bottom
@@ -56,7 +56,7 @@ return {
         --self.y = lerp(self.y, (-currentFloor + 1) * HALLWAY_HEIGHT, 4 * dt)
         self.vy = self.vy * 0.98 --- Todo delta time
       else
-        self.vy = self.vy * 0.99
+        self.vy = self.vy * 0.98
       end
 
       --- Set seat index
