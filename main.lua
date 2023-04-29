@@ -4,6 +4,7 @@ Player = require("unit/player")
 Alien = require("unit/alien")
 Alien1 = require("unit/alien1")
 Alien2 = require("unit/alien2")
+Alien3 = require("unit/alien3")
 AlienManager = require("alienManager")
 HallwayManager = require("hallwayManager")
 BehaviorManager = require("behaviorManager")
@@ -44,6 +45,7 @@ function love.keypressed(key, scancode, isrepeat)
   end
 
   if key == "space" then
+    BehaviorManager:next()
   end
 
   if key == "w" then
@@ -80,7 +82,7 @@ end
 
 FLOOR_COUNT = 10
 HALLWAY_HEIGHT = 190
---PAUSED = true
+PAUSED = true
 
 function love.load()
   --math.randomseed(os.time())
@@ -106,16 +108,20 @@ function love.load()
   ALIEN1_IMAGE = love.graphics.newImage("resources/images/alien1.png")
   ALIEN2_IMAGE = love.graphics.newImage("resources/images/alien2.png")
   ALIEN3_IMAGE = love.graphics.newImage("resources/images/alien3.png")
+  CLOCK_IMAGE = love.graphics.newImage("resources/images/clock.png")
   ELEVATOR_IMAGE = love.graphics.newImage("resources/images/elevator_back.png")
   DIR_IMAGE = love.graphics.newImage("resources/images/dir.png")
   HAPPY_IMAGE = love.graphics.newImage("resources/images/happy.png")
   BEMUSED_IMAGE = love.graphics.newImage("resources/images/bemused.png")
   ANGRY_IMAGE = love.graphics.newImage("resources/images/angry.png")
   UI_PANEL_IMAGE = love.graphics.newImage("resources/images/ui_panel.png")
+  BUBBLE_IMAGE = love.graphics.newImage("resources/images/bubble.png")
+  FALLING_IMAGE = love.graphics.newImage("resources/images/falling.png")
 
   ELEVATOR = Player.create(0, 0)
 
   HallwayManager:init()
+  BehaviorManager:init()
 
   --HallwayManager.floors[1].left:addAlien()
   --HallwayManager.floors[2].left:addAlien()

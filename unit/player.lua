@@ -54,9 +54,9 @@ return {
 
       if noInputs then
         --self.y = lerp(self.y, (-currentFloor + 1) * HALLWAY_HEIGHT, 4 * dt)
-        self.vy = self.vy * 0.98 --- Todo delta time
+        self.vy = lerp(self.vy, 0, dt * 7)
       else
-        self.vy = self.vy * 0.98
+        self.vy = lerp(self.vy, 0, dt * 7)
       end
 
       --- Set seat index

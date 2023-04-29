@@ -20,8 +20,12 @@ return {
 
         addAlien = function(self)
           local constructor = Alien1
-          if math.random() > 0.5 then
+          local rand = math.random()
+
+          if rand > 0.66 then
             constructor = Alien2
+          elseif rand > 0.33 then
+            constructor = Alien3
           end
 
           local alien = constructor.create(self.x * 2, self.y)
@@ -34,7 +38,7 @@ return {
 
           table.insert(self.aliens, alien)
           table.insert(AlienManager.aliens, alien)
-        end,
+          end,
 
         update = function(self)
           for i = 1, #self.aliens do

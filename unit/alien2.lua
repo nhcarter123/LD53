@@ -4,6 +4,12 @@ return {
     unit.color = 'yellow'
     unit.height = -110
 
+    --local baseUpdate = unit.update()
+    --
+    --unit.update = function(self, dt)
+    --  baseUpdate(dt)
+    --end
+
     return unit
   end
 }
