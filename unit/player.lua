@@ -17,11 +17,10 @@ return {
 
     -- Slow down elevator based on capacity
 
-    unit.move = function(self, x, y)
-      self.x = self.x + x
-      --self.y = self.y + y
-
-      self.vy = self.vy + y * 0.07
+    unit.move = function(self, ceilingHeight, y)
+      if self.y > ceilingHeight + self.h then
+        self.vy = self.vy + y * 0.07
+      end
     end
 
     unit.toggleDoor = function(self, isLeft)
@@ -61,7 +60,8 @@ return {
         self.rightDoorPct = lerp(self.rightDoorPct, 0, 10 * dt)
       end
 
-      self.y = self.y + self.vy * dt * 120
+      --- Slow down based on capacity
+      self.y = self.y + self.vy * dt * 100 * (1 - #self.aliens / 16)
       --self.vy = self.vy * 0.98
 
       --- Stop at bottom
@@ -74,27 +74,33 @@ return {
         end
       end
 
-      --- Stop at the ceiling
-      if self.y < ceilingHeight + self.h then
-        self.y = ceilingHeight + self.h
-
-        --- Bounce
-        if self.vy < 0 then
-          self.vy = -self.vy * 0.5
-        end
-      end
+      --if self.y < ceilingHeight + self.h then
+      --  self.y = ceilingHeight + self.h
+      --
+      --  --- Bounce
+      --  if self.vy < 0 then
+      --    self.vy = -self.vy * 0.5
+      --  end
+      --end
 
       self.floor = 1 + round(-self.y / HALLWAY_HEIGHT)
       self.floorDiff = math.abs((self.y + (self.floor - 1) * HALLWAY_HEIGHT) / HALLWAY_HEIGHT)
       --DEBUG[2] = "floor: " .. tostring(self.floor)
       --DEBUG[3] = "FloorDiff: " .. tostring(self.floorDiff)
 
-      if noInputs then
-        --self.y = lerp(self.y, (-currentFloor + 1) * HALLWAY_HEIGHT, 4 * dt)
-        self.vy = lerp(self.vy, 0, dt * 7)
+      --- Stop at the ceiling
+      if self.y < ceilingHeight + self.h then
+        self.vy = self.vy + dt * 12
       else
-        self.vy = lerp(self.vy, 0, dt * 7)
+        --- Friction
+        if noInputs then
+          --self.y = lerp(self.y, (-currentFloor + 1) * HALLWAY_HEIGHT, 4 * dt)
+          self.vy = lerp(self.vy, 0, dt * 3)
+        else
+          self.vy = lerp(self.vy, 0, dt * 3)
+        end
       end
+
 
       --- Set seat index
       for i = 1, #self.aliens do
@@ -103,6 +109,11 @@ return {
     end
 
     unit.draw = function(self)
+      --love.graphics.push()
+      --love.graphics.translate(self.x, self.y)
+      --love.graphics.rotate(time)
+      --love.graphics.translate(-self.x, -self.y)
+
       local sx, sy, sw, sh = love.graphics.getScissor()
 
       local currentX, currentY = cam:getPosition()
@@ -116,6 +127,8 @@ return {
       love.graphics.setColor(1, 1, 1)
 
       love.graphics.setScissor(sx, sy, sw, sh)
+
+      --love.graphics.pop()
     end
 
     return unit

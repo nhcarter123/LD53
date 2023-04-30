@@ -126,7 +126,7 @@ return love.graphics.newShader[[
         if (mod(offset, 4) == 0){
             //float perl = perlin2(uv+offset,2,3.);
             float perl = noise((uv+offset) * 10);
-            col += (1 / layers) * vec3(perl*colR,perl*0.1,perl*colB);
+            col += (0.3 / layers) * vec3(perl*colR,perl*0.1,perl*colB);
         }
 
         // create boxes

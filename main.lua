@@ -10,9 +10,7 @@ AlienManager = require("alienManager")
 HallwayManager = require("hallwayManager")
 BehaviorManager = require("behaviorManager")
 Hallway = require("hallway")
-
 StarShader = require("shaders/starShader")
-
 
 time = 0
 
@@ -20,6 +18,7 @@ hud = {}
 TABS = {}
 DEBUG = {}
 SPLASH = true
+LEVEL_SELECT = true
 
 WIDTH = 1280
 HEIGHT = 720
@@ -47,13 +46,19 @@ W_IS_DOWN = false
 S_IS_DOWN = false
 
 function love.keypressed(key, scancode, isrepeat)
+  BehaviorManager:next()
+
+  if SPLASH then
+    SPLASH = false
+    BehaviorManager.open = true
+  end
+
   if key == "escape" then
     love.event.quit()
   end
 
-  if key == "space" then
-    BehaviorManager:next()
-    SPLASH = false
+  if key == "r" then
+    resetGame()
   end
 
   if key == "w" then
@@ -83,6 +88,7 @@ end
 function love.mousereleased(x, y, button, istouch)
 end
 
+GAME_MODE = 1
 FLOOR_COUNT = 8
 HALLWAY_HEIGHT = 190
 PAUSED = true
@@ -112,7 +118,7 @@ function love.load()
 
   --POINTER_CURSOR = love.mouse.getSystemCursor("hand")
 
-  DEFAULT_FONT = love.graphics.newFont("resources/fonts/ls.ttf", 16)
+  DEFAULT_FONT = love.graphics.newFont("resources/fonts/ls.ttf", 32)
   --LOG_FONT = love.graphics.newFont("resources/fonts/4.ttf", 20)
   --LOG_FONT:setLineHeight(1.2)
 
@@ -183,7 +189,7 @@ function love.update(dt)
       S_HELD = 0
     end
 
-    ELEVATOR:move(0, yVel)
+    ELEVATOR:move(ceilingHeight, yVel)
     ELEVATOR:update(dt, ceilingHeight, yVel == 0)
 
     AlienManager:update(dt)
@@ -210,7 +216,7 @@ function love.update(dt)
   StarShader:send("position", { camX, camY })
   StarShader:send("slope", love.graphics.getWidth() / love.graphics.getHeight())
 
-  DEBUG[1] = "Current FPS: " .. tostring(love.timer.getFPS())
+  --DEBUG[1] = "Current FPS: " .. tostring(love.timer.getFPS())
 end
 
 local function drawCameraStuff(l, t, w, h)
@@ -256,6 +262,13 @@ function love.draw()
 
   if SPLASH then
     love.graphics.draw(SPLASH_IMAGE, 0, 0, 0, 2, 2)
+    love.graphics.print("Press any key", love.graphics.getWidth() / 2 - DEFAULT_FONT:getWidth("Press any key") / 2, 80 + math.sin(time) * 10, 0, 1, 1)
+    --love.graphics.printf("Press any key", love.graphics.getWidth() / 2, 80, 200, 'center')
+    return
+  end
+
+  if LEVEL_SELECT then
+
     return
   end
 
@@ -264,6 +277,21 @@ function love.draw()
   if PAUSED then
     BehaviorManager:draw()
   end
+
+  --- Draw UI
+  love.graphics.draw(HAPPY_IMAGE, 20, 20, 0, 1, 1)
+  love.graphics.draw(BEMUSED_IMAGE, 120, 20, 0, 1, 1)
+  love.graphics.draw(ANGRY_IMAGE, 220, 20, 0, 1, 1)
+  --- Text
+  love.graphics.setColor(0.2, 0.2, 0.2)
+  love.graphics.print(TOTAL_SMILIES, 65+2, 28+2, 0, 0.5, 0.5)
+  love.graphics.print(TOTAL_BEMUSED, 165+2, 28+2, 0, 0.5, 0.5)
+  love.graphics.print(TOTAL_FROWNIES, 265+2, 28+2, 0, 0.5, 0.5)
+
+  love.graphics.setColor(1, 1, 1)
+  love.graphics.print(TOTAL_SMILIES, 65, 28, 0, 0.5, 0.5)
+  love.graphics.print(TOTAL_BEMUSED, 165, 28, 0, 0.5, 0.5)
+  love.graphics.print(TOTAL_FROWNIES, 265, 28, 0, 0.5, 0.5)
 
   --for i = 1, 100 do
   --  BALLS[i]:draw()
@@ -294,6 +322,18 @@ end
 --  --love.graphics.circle("fill", 0, 0, 10)
 --end
 
-function _if(bool, func1, func2)
-  if bool then return func1() else return func2() end
+function resetGame()
+  LEVEL_SELECT = true
+  ELEVATOR.aliens = {}
+  AlienManager.aliens = {}
+  HallwayManager:init()
+  BehaviorManager:init()
+  TOTAL_FROWNIES = 0
+  TOTAL_BEMUSED = 0
+  TOTAL_SMILIES = 0
+  ELEVATOR.y = 0
+  ELEVATOR.vy = 0
+  W_HELD = 0
+  S_HELD = 0
+  cam:setPosition(0, 0)
 end

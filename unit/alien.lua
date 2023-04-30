@@ -21,7 +21,7 @@ return {
       seatIndex = 1,
       emotes = {},
       height = -140,
-      happiness = 0.6,
+      happiness = 0.7,
       dialogueOpen = 0,
       waitingCount = 0,
       patienceInterval = 30,
@@ -78,7 +78,8 @@ return {
         end
       end
 
-      if self.hallway.isPlayground and (self.beenInPlaygroundCount < PLAYGROUND_BOREDOM_COUNT or self.happiness >= 0.7) then
+      --if self.hallway.isPlayground and (self.beenInPlaygroundCount < PLAYGROUND_BOREDOM_COUNT and self.happiness < 0.7) then
+      if self.hallway.isPlayground and self.happiness < 0.7 then
         return false
       end
 
@@ -105,7 +106,8 @@ return {
         return false
       end
 
-      if hallway.isPlayground and (self.beenInPlaygroundCount < PLAYGROUND_BOREDOM_COUNT or self.happiness < 0.7) then
+      --if hallway.isPlayground and (self.beenInPlaygroundCount < PLAYGROUND_BOREDOM_COUNT and self.happiness < 0.7) then
+      if hallway.isPlayground and self.happiness < 0.7 then
         return true
       end
 
@@ -133,9 +135,9 @@ return {
         TOTAL_FROWNIES = TOTAL_FROWNIES + 1
       end
 
-      DEBUG[2] = "Smilies: " .. tostring(TOTAL_SMILIES)
-      DEBUG[3] = "Bemused: " .. tostring(TOTAL_BEMUSED)
-      DEBUG[4] = "Frownies: " .. tostring(TOTAL_FROWNIES)
+      --DEBUG[2] = "Smilies: " .. tostring(TOTAL_SMILIES)
+      --DEBUG[3] = "Bemused: " .. tostring(TOTAL_BEMUSED)
+      --DEBUG[4] = "Frownies: " .. tostring(TOTAL_FROWNIES)
     end
 
     unit.addEmote = function(self, img, delay)
@@ -215,8 +217,12 @@ return {
       if self.onElevator then
         --self.y = ELEVATOR.y
 
-        self.vy = self.vy + dt * 320
+        self.vy = self.vy + dt * 240
         self.y = self.y + self.vy * dt
+
+        if self.y < ELEVATOR.y - HALLWAY_HEIGHT - self.height then
+          self.y = ELEVATOR.y - HALLWAY_HEIGHT - self.height
+        end
 
         if self.y > ELEVATOR.y then
           self.groundedCount = 0
@@ -229,11 +235,16 @@ return {
         else
           self.groundedCount = self.groundedCount + dt
           if self.groundedCount > 2 and not self.gotFallingReward then
-            if self.color == 'yellow' then
+            local happinessInc = BehaviorManager.fallingHappinessMap[self.color]
+            if happinessInc ~= nil then
               self.gotFallingReward = true
-              self:adjustHappiness(0.35)
+              self:adjustHappiness(happinessInc)
               self:addEmote(FALLING_IMAGE, 0)
-              self:addEmote(HAPPY_IMAGE, 1)
+              if happinessInc > 0 then
+                self:addEmote(HAPPY_IMAGE, 1)
+              else
+                self:addEmote(ANGRY_IMAGE, 1)
+              end
             end
           end
         end
@@ -253,14 +264,18 @@ return {
         --  self.y = ELEVATOR.y
         --end
 
-        local left = HallwayManager.floors[ELEVATOR.floor].left
-        local right = HallwayManager.floors[ELEVATOR.floor].right
-
+        local floor = HallwayManager.floors[ELEVATOR.floor]
         local target = nil
-        if self:isExitAccessible(left) then
-          target = left
-        elseif self:isExitAccessible(right) then
-          target = right
+
+        if floor then
+          local left = floor.left
+          local right = floor.right
+
+          if self:isExitAccessible(left) then
+            target = left
+          elseif self:isExitAccessible(right) then
+            target = right
+          end
         end
 
         if target then
@@ -301,7 +316,7 @@ return {
             self:walkTo(dt, 0, 6)
           else
             if self.hallway.isPlayground then
-              self:walkTo(dt, 1.2 * self.hallway.doorX - (self.seatIndex - 1) * 400 / #self.hallway.aliens, 1)
+              self:walkTo(dt, 1.2 * self.hallway.doorX + sign(self.hallway.doorX) * (self.seatIndex - 1) * 450 / #self.hallway.aliens, 1)
             else
               self:walkTo(dt, self.hallway.doorX - (self.seatIndex - 1) * WAIT_SPACING, 1)
             end
@@ -353,6 +368,13 @@ return {
     end
 
     unit.draw = function(self)
+      --if self.onElevator then
+      --  love.graphics.push()
+      --  love.graphics.translate(ELEVATOR.x, ELEVATOR.y)
+      --  love.graphics.rotate(time)
+      --  love.graphics.translate(-ELEVATOR.x, -ELEVATOR.y)
+      --end
+
       love.graphics.draw(self.img, self.x, self.y, 0, self.dir, 1 * self.breathY * self.gravityStretch, 107 / 2, 147)
 
       if self.dialogueOpen > 0 then
@@ -387,6 +409,10 @@ return {
       --  love.graphics.print(self.targetFloor, self.x, self.y - 140, 0, 1, 1, 5, 8)
       --end
       --love.graphics.print(self.seatIndex, self.x, self.y - 100, 0, 1, 1, 5, 8)
+
+      --if self.onElevator then
+      --  love.graphics.pop()
+      --end
     end
 
     return unit

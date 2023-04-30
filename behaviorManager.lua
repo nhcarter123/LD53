@@ -1,6 +1,9 @@
 return {
     behaviors = {},
     currentBehavior = 1,
+    fallingHappinessMap = {
+      yellow = 0.35
+    },
 
     init = function(self)
       self.behaviors = {
@@ -59,11 +62,21 @@ return {
       }
     end,
 
+    addNewBehavior = function(self)
+      if #self.fallingHappinessMap < TOTAL_COLORS then
+
+      end
+    end,
+
     update = function(self, dt)
 
     end,
 
     next = function(self)
+      if not self.open then
+        return
+      end
+
       if self.currentBehavior < #self.behaviors then
         self.currentBehavior = self.currentBehavior + 1
       else
@@ -108,9 +121,9 @@ return {
       love.graphics.draw(behavior.rightImg, cx + spacing, cy + oy, 0, 1 * b3, 1 * b3, behavior.rightOx, behavior.rightOy)
 
       love.graphics.setColor(0, 0, 0)
-      love.graphics.print(behavior.leftText, cx - spacing - DEFAULT_FONT:getWidth(behavior.leftText) / 2, cy + textHeight + oy)
-      love.graphics.print(centerText, cx - DEFAULT_FONT:getWidth(centerText) / 2, cy + textHeight + oy)
-      love.graphics.print(behavior.rightText, cx + spacing - DEFAULT_FONT:getWidth(behavior.rightText) / 2, cy + textHeight + oy)
+      love.graphics.print(behavior.leftText, cx - spacing - DEFAULT_FONT:getWidth(behavior.leftText) / 4, cy + textHeight + oy, 0, 0.5, 0.5)
+      love.graphics.print(centerText, cx - DEFAULT_FONT:getWidth(centerText) / 4, cy + textHeight + oy, 0, 0.5, 0.5)
+      love.graphics.print(behavior.rightText, cx + spacing - DEFAULT_FONT:getWidth(behavior.rightText) / 4, cy + textHeight + oy, 0, 0.5, 0.5)
       love.graphics.setColor(1, 1, 1)
     end,
 }
