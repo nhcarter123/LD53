@@ -1,7 +1,7 @@
 return {
   aliens = {},
   spawnCount = 999,
-  spawnInterval = 3,
+  spawnInterval = 2,
   difficultyCount = 0,
   difficultyIncreaseInterval = 1500000,
   --differ

@@ -89,6 +89,21 @@ function love.load()
   love.graphics.setBackgroundColor(46 / 255, 50 / 255, 35 / 255)
   love.keyboard.setKeyRepeat(true)
 
+  SOUNDTRACK_1 = love.audio.newSource("resources/sounds/track1.mp3", "stream")
+  HAPPY_SOUND_1 = love.audio.newSource("resources/sounds/happy1.mp3", "static")
+  HAPPY_SOUND_2 = love.audio.newSource("resources/sounds/happy2.mp3", "static")
+  HAPPY_SOUND_3 = love.audio.newSource("resources/sounds/happy3.mp3", "static")
+  HAPPY_SOUND_4 = love.audio.newSource("resources/sounds/happy4.mp3", "static")
+  HAPPY_SOUND_5 = love.audio.newSource("resources/sounds/happy5.mp3", "static")
+  ANGRY_SOUND_1 = love.audio.newSource("resources/sounds/angry1.mp3", "static")
+  ANGRY_SOUND_2 = love.audio.newSource("resources/sounds/angry2.mp3", "static")
+  ANGRY_SOUND_3 = love.audio.newSource("resources/sounds/angry3.mp3", "static")
+  OPEN_SOUND = love.audio.newSource("resources/sounds/open.mp3", "static")
+  CLOSE_SOUND = love.audio.newSource("resources/sounds/close.mp3", "static")
+  BLIP_SOUND = love.audio.newSource("resources/sounds/blip.mp3", "static")
+
+  SOUNDTRACK_1:setLooping(true)
+  SOUNDTRACK_1:play()
 
   --POINTER_CURSOR = love.mouse.getSystemCursor("hand")
 
@@ -99,7 +114,7 @@ function love.load()
   love.graphics.setFont(DEFAULT_FONT)
 
   ---- Units
-  HALLWAY_DETAIL_IMAGE = love.graphics.newImage("resources/images/hallway_detail.png")
+  HALLWAY_DETAIL_IMAGE = love.graphics.newImage("resources/images/hallway.png")
   PLAYGROUND_IMAGE = love.graphics.newImage("resources/images/playground.png")
   --HALLWAY_IMAGE = love.graphics.newImage("resources/images/hallway.png")
   --HALLWAY_G_IMAGE = love.graphics.newImage("resources/images/hallway_g.png")

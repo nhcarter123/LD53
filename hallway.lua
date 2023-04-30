@@ -71,7 +71,7 @@ return {
 
           if played then
             alien.beenInPlaygroundCount = alien.beenInPlaygroundCount + 1
-            alien.happiness = clamp(0, alien.happiness + 0.1, 1)
+            alien:adjustHappiness(0.1)
             alien:addEmote(HAPPY_IMAGE, 0)
           end
         end

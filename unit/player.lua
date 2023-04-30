@@ -35,9 +35,20 @@ return {
     unit.update = function(self, dt, ceilingHeight, noInputs)
       --self.y = self.y + 0.2;
       --self.x = self.x + self.vx
+      --love.audio.setPosition(self.x, self.y, 0)
 
       self.leftDoorOpen = love.keyboard.isDown("a")
       self.rightDoorOpen = love.keyboard.isDown("d")
+
+      if (self.leftDoorOpen and not self.wasLeftDown) or (self.rightDoorOpen and not self.wasRightDown) then
+        love.audio.play(OPEN_SOUND)
+      end
+      if (not self.leftDoorOpen and self.wasLeftDown) or (not self.rightDoorOpen and self.wasRightDown) then
+        love.audio.play(CLOSE_SOUND)
+      end
+
+      self.wasLeftDown = self.leftDoorOpen
+      self.wasRightDown = self.rightDoorOpen
 
       if self.leftDoorOpen then
         self.leftDoorPct = lerp(self.leftDoorPct, 1, 10 * dt)

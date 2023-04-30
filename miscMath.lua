@@ -240,3 +240,29 @@ function removeEl(tbl, el)
     end
   end
 end
+
+function playRandomAngryNoise()
+  local rand = math.random()
+  if rand > 0.66 then
+    love.audio.play(ANGRY_SOUND_1)
+  elseif rand > 0.33 then
+    love.audio.play(ANGRY_SOUND_2)
+  else
+    love.audio.play(ANGRY_SOUND_3)
+  end
+end
+
+function playRandomHappyNoise()
+  local rand = math.random()
+  if rand > 0.8 then
+    love.audio.play(HAPPY_SOUND_1)
+  elseif rand > 0.6 then
+    love.audio.play(HAPPY_SOUND_2)
+  elseif rand > 0.4 then
+    love.audio.play(HAPPY_SOUND_3)
+  elseif rand > 0.2 then
+    love.audio.play(HAPPY_SOUND_4)
+  else
+    love.audio.play(HAPPY_SOUND_5)
+  end
+end
