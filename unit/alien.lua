@@ -1,8 +1,11 @@
 WAIT_SPACING = 50
 ELEVATOR_ENTRY_DIST = 200
 EXIT_DIST = 600
-ELEVATOR_ACCEPTABLE_DIFF = 0.1
+ELEVATOR_ACCEPTABLE_DIFF = 0.5
 ELEVATOR_WIDTH = 320
+TOTAL_FROWNIES = 0
+TOTAL_BEMUSED = 0
+TOTAL_SMILIES = 0
 
 return {
   create = function(x, y, img)
@@ -20,10 +23,12 @@ return {
       happiness = 0.8,
       dialogueOpen = 0,
       waitingCount = 0,
-      patienceInterval = 30,
+      patienceInterval = 40,
       gravityStretch = 1,
       groundedCount = 0,
-      currentWalkSpeed = 0
+      currentWalkSpeed = 0,
+      hbOffset = math.random() * 10,
+      beenInPlaygroundCount = 0,
     }
 
     unit.move = function(self, x, y)
@@ -34,21 +39,33 @@ return {
     unit.walkTo = function(self, dt, x, multi)
       --local walkSpeed = math.abs(70 * dt * (1 + math.sin(time * 8) / 1))
       local walkSpeed = math.abs(120 * dt * multi)
-      self.currentWalkSpeed = lerp(self.currentWalkSpeed, walkSpeed, 2 * dt)
+      self.currentWalkSpeed = lerp(self.currentWalkSpeed, walkSpeed, 4 * dt)
       self.x = self.x + clamp(-self.currentWalkSpeed, x - self.x, self.currentWalkSpeed)
-
-      --if not onElevator and ELEVATOR.floorDiff > ELEVATOR_ACCEPTABLE_DIFF and self.x < 200 then
-      --  self.x = 200
-      --end
 
       if x - self.x < 0 then
         self.dir = -1
       elseif x - self.x > 0 then
         self.dir = 1
       end
+
+      --if not self.onElevator and ELEVATOR.floorDiff > ELEVATOR_ACCEPTABLE_DIFF and self.hallway.floor == ELEVATOR.floor then
+      --  if x > self.x then
+      --    if self.x < 200 then
+      --      self.x = 200
+      --    end
+      --  else
+      --    if self.x > -200 then
+      --      self.x = -200
+      --    end
+      --  end
+      --end
     end
 
     unit.isElevatorAccessible = function(self)
+      if #ELEVATOR.aliens >= 8 then
+        return false
+      end
+
       if self.x > ELEVATOR.x then
         if not ELEVATOR.rightDoorOpen then
           return false
@@ -57,6 +74,10 @@ return {
         if not ELEVATOR.leftDoorOpen then
           return false
         end
+      end
+
+      if self.hallway.isPlayground and self.beenInPlaygroundCount < 1 then
+        return false
       end
 
       if self.hallway.floor == ELEVATOR.floor
@@ -78,6 +99,14 @@ return {
         end
       end
 
+      if #hallway.aliens >= HALLWAY_MAX_CAPACITY then
+        return false
+      end
+
+      if hallway.isPlayground then
+        return true
+      end
+
       if hallway.color == self.color
           --ELEVATOR.floorDiff < ELEVATOR_ACCEPTABLE_DIFF
           --math.abs(ELEVATOR.vy) < 1
@@ -89,12 +118,20 @@ return {
     unit.declareHappiness = function(self)
       self.dialogueOpen = 3
 
-      self.happinessImg = ANGRY_IMAGE
       if self.happiness > 0.66 then
         self.happinessImg = HAPPY_IMAGE
+        TOTAL_SMILIES = TOTAL_SMILIES + 1
       elseif self.happiness > 0.33 then
         self.happinessImg = BEMUSED_IMAGE
+        TOTAL_BEMUSED = TOTAL_BEMUSED + 1
+      else
+        self.happinessImg = ANGRY_IMAGE
+        TOTAL_FROWNIES = TOTAL_FROWNIES + 1
       end
+
+      DEBUG[2] = "Smilies: " .. tostring(TOTAL_SMILIES)
+      DEBUG[3] = "Bemused: " .. tostring(TOTAL_BEMUSED)
+      DEBUG[4] = "Frownies: " .. tostring(TOTAL_FROWNIES)
     end
 
     unit.addEmote = function(self, img, delay)
@@ -107,11 +144,17 @@ return {
       })
     end
 
-    unit.applySeenReward = function(self)
+    unit.applySeenReward = function(self, isGood)
       if not self.seenReward then
-        self.happiness = self.happiness + 0.2
-        self:addEmote(HAPPY_IMAGE, 0)
         self.seenReward = true
+
+        if isGood then
+          self.happiness = self.happiness + 0.4
+          self:addEmote(HAPPY_IMAGE, 0)
+        else
+          self.happiness = self.happiness - 0.4
+          self:addEmote(ANGRY_IMAGE, 0)
+        end
       end
     end
 
@@ -186,7 +229,7 @@ return {
         end
 
         if target then
-          self:walkTo(dt, target.x, 8)
+          self:walkTo(dt, target.x, 6)
         else
           local spacing = ELEVATOR_WIDTH / #ELEVATOR.aliens
           self:walkTo(dt, ELEVATOR.x - ELEVATOR_WIDTH / 2 + (self.seatIndex - 0.5) * spacing, 1)
@@ -199,7 +242,9 @@ return {
           self.onElevator = false
           table.insert(self.hallway.aliens, self)
 
-          self:declareHappiness()
+          if self.hallway.color then
+            self:declareHappiness()
+          end
           --self:addEmote(HAPPY_IMAGE)
         end
       else
@@ -216,7 +261,7 @@ return {
           local canWalkOnElevator = self:isElevatorAccessible()
 
           if canWalkOnElevator then
-            self:walkTo(dt, 0, 8)
+            self:walkTo(dt, 0, 6)
           else
             self:walkTo(dt, self.hallway.doorX - (self.seatIndex - 1) * WAIT_SPACING, 1)
           end
@@ -227,14 +272,22 @@ return {
             self.hallway = nil
             self.onElevator = true
             table.insert(ELEVATOR.aliens, self)
+            self.beenInPlaygroundCount = 0
 
             for i = 1, #ELEVATOR.aliens do
               local alien = ELEVATOR.aliens[i]
               if alien.color == 'green' and self.color == 'yellow' then
-                self:applySeenReward()
+                alien:applySeenReward(true)
               end
               if alien.color == 'yellow' and self.color == 'green' then
-                alien:applySeenReward()
+                self:applySeenReward(true)
+              end
+
+              if alien.color == 'aqua' and self.color == 'green' then
+                alien:applySeenReward(false)
+              end
+              if alien.color == 'green' and self.color == 'aqua' then
+                self:applySeenReward(false)
               end
             end
           end
@@ -251,10 +304,10 @@ return {
         self:addEmote(CLOCK_IMAGE, 0)
         self:addEmote(ANGRY_IMAGE, 1)
         self.waitingCount = 0
-        self.happiness = self.happiness - 0.2
+        self.happiness = self.happiness - 0.3
       end
 
-      self.breathY = 1 + math.sin(time * 2 + self.breathOffset) / 30
+      self.breathY = 1 + 8 * math.sin(time * 2 + self.breathOffset) / self.height
     end
 
     unit.draw = function(self)
@@ -276,6 +329,13 @@ return {
           love.graphics.setColor(1, 1, 1)
         end
       end
+
+      local healthBarWidth = 50
+      love.graphics.setColor(0.2, 0.2, 0.2)
+      love.graphics.rectangle("fill", self.x - healthBarWidth / 2, self.y + 15 + self.hbOffset, healthBarWidth, 5)
+      love.graphics.setColor(1 - self.happiness, self.happiness, 0)
+      love.graphics.rectangle("fill", self.x - healthBarWidth / 2, self.y + 15 + self.hbOffset, healthBarWidth * self.happiness, 4)
+      love.graphics.setColor(1, 1, 1)
 
       --love.graphics.print(self.targetSide, self.x, self.y - 130)
 

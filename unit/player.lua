@@ -50,8 +50,6 @@ return {
         self.rightDoorPct = lerp(self.rightDoorPct, 0, 10 * dt)
       end
 
-      DEBUG[2] = "DoorPct: " .. tostring(self.doorPct)
-
       self.y = self.y + self.vy * dt * 120
       --self.vy = self.vy * 0.98
 
@@ -97,7 +95,7 @@ return {
       local sx, sy, sw, sh = love.graphics.getScissor()
 
       local currentX, currentY = cam:getPosition()
-      love.graphics.setScissor(WIDTH / 2 - self.w / 2, HEIGHT / 2 + self.y - currentY - self.h, self.w, self.h)
+      love.graphics.setScissor(love.graphics.getWidth() / 2 - self.w / 2, love.graphics.getHeight() / 2 + self.y - currentY - self.h, self.w, self.h)
 
       love.graphics.draw(ELEVATOR_IMAGE, self.x, self.y, 0, 1, 1, self.w / 2, self.h)
 

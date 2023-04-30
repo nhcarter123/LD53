@@ -22,14 +22,18 @@ return {
 
       local exitColors = {
         'green',
-        'green',
+        --'green',
         'yellow',
-        'yellow',
+        --'yellow',
         'purple',
-        'purple',
+        --'purple',
+        'aqua',
+        --'aqua',
       }
 
       shuffle(availableHallways)
+      local playground = table.remove(availableHallways, #availableHallways)
+      playground.isPlayground = true
 
       for i = 1, #exitColors do
         local targetHallway = table.remove(availableHallways, #availableHallways)
@@ -52,11 +56,11 @@ return {
       end
     end,
 
-    update = function(self)
+    update = function(self, dt)
       for i = 1, #self.floors do
         local floor = self.floors[i]
-        floor.left:update()
-        floor.right:update()
+        floor.left:update(dt)
+        floor.right:update(dt)
       end
     end,
 

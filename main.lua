@@ -5,6 +5,7 @@ Alien = require("unit/alien")
 Alien1 = require("unit/alien1")
 Alien2 = require("unit/alien2")
 Alien3 = require("unit/alien3")
+Alien4 = require("unit/alien4")
 AlienManager = require("alienManager")
 HallwayManager = require("hallwayManager")
 BehaviorManager = require("behaviorManager")
@@ -18,9 +19,11 @@ DEBUG = {}
 
 WIDTH = 1280
 HEIGHT = 720
-love.window.setMode(WIDTH, HEIGHT)
+love.window.setMode(WIDTH, HEIGHT, {
+  --fullscreen = true
+})
 
-local camW = 2000
+local camW = 3000
 local camH = 8000
 cam = Gamera.new(-camW/2, -camH/2, camW, camH)
 
@@ -75,7 +78,7 @@ end
 function love.mousereleased(x, y, button, istouch)
 end
 
-FLOOR_COUNT = 20
+FLOOR_COUNT = 8
 HALLWAY_HEIGHT = 190
 PAUSED = true
 
@@ -96,13 +99,16 @@ function love.load()
   love.graphics.setFont(DEFAULT_FONT)
 
   ---- Units
-  HALLWAY_IMAGE = love.graphics.newImage("resources/images/hallway.png")
-  HALLWAY_G_IMAGE = love.graphics.newImage("resources/images/hallway_g.png")
-  HALLWAY_Y_IMAGE = love.graphics.newImage("resources/images/hallway_y.png")
-  HALLWAY_P_IMAGE = love.graphics.newImage("resources/images/hallway_p.png")
+  HALLWAY_DETAIL_IMAGE = love.graphics.newImage("resources/images/hallway_detail.png")
+  PLAYGROUND_IMAGE = love.graphics.newImage("resources/images/playground.png")
+  --HALLWAY_IMAGE = love.graphics.newImage("resources/images/hallway.png")
+  --HALLWAY_G_IMAGE = love.graphics.newImage("resources/images/hallway_g.png")
+  --HALLWAY_Y_IMAGE = love.graphics.newImage("resources/images/hallway_y.png")
+  --HALLWAY_P_IMAGE = love.graphics.newImage("resources/images/hallway_p.png")
   ALIEN1_IMAGE = love.graphics.newImage("resources/images/alien1.png")
   ALIEN2_IMAGE = love.graphics.newImage("resources/images/alien2.png")
   ALIEN3_IMAGE = love.graphics.newImage("resources/images/alien3.png")
+  ALIEN4_IMAGE = love.graphics.newImage("resources/images/alien4.png")
   CLOCK_IMAGE = love.graphics.newImage("resources/images/clock.png")
   ELEVATOR_IMAGE = love.graphics.newImage("resources/images/elevator_back.png")
   DIR_IMAGE = love.graphics.newImage("resources/images/dir.png")
@@ -158,7 +164,7 @@ function love.update(dt)
     ELEVATOR:update(dt, ceilingHeight, yVel == 0)
 
     AlienManager:update(dt)
-    HallwayManager:update()
+    HallwayManager:update(dt)
 
     --DEBUG[2] = "Floor: " .. tostring(1 + round(-ELEVATOR.y / HALLWAY_HEIGHT))
 
@@ -188,6 +194,20 @@ local function drawCameraStuff(l, t, w, h)
 end
 
 function love.draw()
+  --actual_width = love.graphics.getWidth()
+  --actual_height = love.graphics.getHeight()
+  --desired_width = 1280
+  --desired_height = 720
+  --
+  --local xscale = actual_width/desired_width
+  --local yscale = actual_height/desired_height
+  --local scale = math.min(xscale, yscale)
+  --local xoffset = (actual_width-desired_width*scale)/2
+  --local yoffset = (actual_height-desired_height*scale)/2
+  --love.graphics.translate(xoffset, yoffset)
+  --love.graphics.scale(scale, scale)
+  --
+  --cam:setScale(scale)
   cam:draw(drawCameraStuff)
 
   if PAUSED then

@@ -2,6 +2,8 @@ return {
   aliens = {},
   spawnCount = 999,
   spawnInterval = 3,
+  difficultyCount = 0,
+  difficultyIncreaseInterval = 1500000,
   --differ
 
   update = function(self, dt)
@@ -10,9 +12,27 @@ return {
     if self.spawnCount > self.spawnInterval then
       self.spawnCount = 0
 
-      local targetHallway = self.entryPoints[math.random(#self.entryPoints)]
+      --- Don't spawn in a full hallway
+      local legalSpawnAreas = {}
+      for i = 1, #self.entryPoints do
+        local hallway = self.entryPoints[i]
+        if #hallway.aliens < HALLWAY_MAX_CAPACITY then
+          table.insert(legalSpawnAreas, hallway)
+        end
+      end
+
+      local targetHallway = legalSpawnAreas[math.random(#legalSpawnAreas)]
       targetHallway:addAlien()
     end
+
+    if self.difficultyCount > self.difficultyIncreaseInterval then
+      self.difficultyCount = 0
+
+      if self.spawnInterval > 1.3 then
+        self.spawnInterval = self.spawnInterval - 0.2
+      end
+    end
+    self.difficultyCount = self.difficultyCount + dt
 
     --local mx, my = love.mouse.getPosition()
     --local wmx, wmy = cam:toWorld(mx, my)

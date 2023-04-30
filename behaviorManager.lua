@@ -45,6 +45,20 @@ return {
           rightText = "waiting.",
           rightOx = 20,
           rightOy = 20
+        },
+        {
+          leftImg = ALIEN4_IMAGE,
+          leftText = "Blormas",
+          leftOx = 107/2,
+          leftOy = 147/2,
+
+          emotion = 'hates',
+          centerText = 'hate',
+
+          rightImg = ALIEN1_IMAGE,
+          rightText = "Glorbles.",
+          rightOx = 107/2,
+          rightOy = 147/2,
         }
       }
     end,
