@@ -21,7 +21,7 @@ return {
       seatIndex = 1,
       emotes = {},
       height = -140,
-      happiness = 0.5,
+      happiness = 0.6,
       dialogueOpen = 0,
       waitingCount = 0,
       patienceInterval = 30,
@@ -30,6 +30,7 @@ return {
       currentWalkSpeed = 0,
       hbOffset = math.random() * 10,
       beenInPlaygroundCount = 0,
+      deathCount = 0,
     }
 
     unit.move = function(self, x, y)
@@ -77,7 +78,7 @@ return {
         end
       end
 
-      if self.hallway.isPlayground and self.beenInPlaygroundCount < PLAYGROUND_BOREDOM_COUNT then
+      if self.hallway.isPlayground and (self.beenInPlaygroundCount < PLAYGROUND_BOREDOM_COUNT or self.happiness >= 0.7) then
         return false
       end
 
@@ -104,7 +105,7 @@ return {
         return false
       end
 
-      if hallway.isPlayground and self.beenInPlaygroundCount < PLAYGROUND_BOREDOM_COUNT then
+      if hallway.isPlayground and (self.beenInPlaygroundCount < PLAYGROUND_BOREDOM_COUNT or self.happiness < 0.7) then
         return true
       end
 
@@ -154,10 +155,14 @@ return {
     end
 
     unit.adjustHappiness = function(self, inc)
+      if self.deathCount > 0 then
+        return
+      end
+
       self.happiness = clamp(0, self.happiness + inc, 1)
 
       if self.happiness == 0 then
-        self.dead = true
+        self.deathCount = 2
       end
     end
 
@@ -166,10 +171,10 @@ return {
         self.seenReward = true
 
         if isGood then
-          self:adjustHappiness(0.4)
+          self:adjustHappiness(0.45)
           self:addEmote(HAPPY_IMAGE, 0)
         else
-          self:adjustHappiness(-0.4)
+          self:adjustHappiness(-0.45)
           self:addEmote(ANGRY_IMAGE, 0)
         end
       end
@@ -178,6 +183,19 @@ return {
     unit.update = function(self, dt)
       --self.y = self.y + 0.2;
       --self.x = self.x + self.vx
+
+      if self.deathCount > 0 then
+        self.deathCount = self.deathCount - dt
+
+        if self.deathCount <= 0 then
+          --- Destroy this alien
+          if self.hallway then
+            removeEl(self.hallway.aliens, self)
+            removeEl(ELEVATOR.aliens, self)
+            removeEl(AlienManager.aliens, self)
+          end
+        end
+      end
 
       for i = #self.emotes, 1, -1 do
         local emote = self.emotes[i]
@@ -283,13 +301,13 @@ return {
             self:walkTo(dt, 0, 6)
           else
             if self.hallway.isPlayground then
-              self:walkTo(dt, self.hallway.doorX - (self.seatIndex - 1) * 400 / #self.hallway.aliens, 1)
+              self:walkTo(dt, 1.2 * self.hallway.doorX - (self.seatIndex - 1) * 400 / #self.hallway.aliens, 1)
             else
               self:walkTo(dt, self.hallway.doorX - (self.seatIndex - 1) * WAIT_SPACING, 1)
             end
           end
 
-          if math.abs(self.x) < ELEVATOR_ENTRY_DIST and ELEVATOR.floorDiff < ELEVATOR_ACCEPTABLE_DIFF then
+          if canWalkOnElevator and math.abs(self.x) < ELEVATOR_ENTRY_DIST and ELEVATOR.floorDiff < ELEVATOR_ACCEPTABLE_DIFF then
             --- Enter the elevator
             removeEl(self.hallway.aliens, self)
             self.hallway = nil
@@ -356,9 +374,9 @@ return {
 
       local healthBarWidth = 50
       love.graphics.setColor(0.1, 0.1, 0.1)
-      love.graphics.rectangle("fill", self.x - healthBarWidth / 2 - 2, self.y + 5 + self.hbOffset - 2, healthBarWidth + 4, 8)
+      love.graphics.rectangle("fill", self.x - healthBarWidth / 2 - 2, self.y + self.hbOffset - 2, healthBarWidth + 4, 8)
       love.graphics.setColor(1 - self.happiness, self.happiness, 0)
-      love.graphics.rectangle("fill", self.x - healthBarWidth / 2, self.y + 5 + self.hbOffset, healthBarWidth * self.happiness, 4)
+      love.graphics.rectangle("fill", self.x - healthBarWidth / 2, self.y + self.hbOffset, healthBarWidth * self.happiness, 4)
       love.graphics.setColor(1, 1, 1)
 
       --love.graphics.print(self.happiness, self.x, self.y + 25)
