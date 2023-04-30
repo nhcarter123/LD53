@@ -18,7 +18,6 @@ hud = {}
 TABS = {}
 DEBUG = {}
 SPLASH = true
-LEVEL_SELECT = true
 
 WIDTH = 1280
 HEIGHT = 720
@@ -46,12 +45,15 @@ W_IS_DOWN = false
 S_IS_DOWN = false
 
 function love.keypressed(key, scancode, isrepeat)
-  BehaviorManager:next()
-
   if SPLASH then
     SPLASH = false
-    BehaviorManager.open = true
+    LEVEL_SELECT = true
+    return
   end
+
+  --BehaviorManager.open = true
+
+  BehaviorManager:next()
 
   if key == "escape" then
     love.event.quit()
@@ -213,8 +215,14 @@ function love.update(dt)
   local camX, camY = cam:getPosition()
   StarShader:send("time", time)
   StarShader:send("zoom", cam:getScale())
-  StarShader:send("position", { camX, camY })
+  StarShader:send("position", { camX * 2, camY * 2 })
   StarShader:send("slope", love.graphics.getWidth() / love.graphics.getHeight())
+
+  if LEVEL_SELECT then
+    --LEVEL_SELECT = false
+    --BehaviorManager.open = true
+    StarShader:send("position", { time * 500, 0 })
+  end
 
   --DEBUG[1] = "Current FPS: " .. tostring(love.timer.getFPS())
 end
@@ -241,8 +249,10 @@ local function drawCameraStuff(l, t, w, h)
 end
 
 function love.draw()
+  local screenWidth = love.graphics.getWidth()
+  local screenHeight = love.graphics.getHeight()
   love.graphics.setShader(StarShader)
-  love.graphics.draw(EMPTY_TEXTURE_IMAGE, 0, 0, 0, love.graphics.getWidth(),  love.graphics.getHeight())
+  love.graphics.draw(EMPTY_TEXTURE_IMAGE, 0, 0, 0, screenWidth, screenHeight)
   love.graphics.setShader()
 
   --actual_width = love.graphics.getWidth()
@@ -262,13 +272,23 @@ function love.draw()
 
   if SPLASH then
     love.graphics.draw(SPLASH_IMAGE, 0, 0, 0, 2, 2)
-    love.graphics.print("Press any key", love.graphics.getWidth() / 2 - DEFAULT_FONT:getWidth("Press any key") / 2, 80 + math.sin(time) * 10, 0, 1, 1)
+    love.graphics.print("Press any key", screenWidth / 2 - DEFAULT_FONT:getWidth("Press any key") / 2, 80 + math.sin(time) * 10, 0, 1, 1)
     --love.graphics.printf("Press any key", love.graphics.getWidth() / 2, 80, 200, 'center')
     return
   end
 
   if LEVEL_SELECT then
+    local spacing = 270
+    local panelX1 = screenWidth / 2 - spacing
+    local panelX2 = screenWidth / 2 + spacing
+    local panelY = screenHeight / 2
+    love.graphics.draw(UI_PANEL_IMAGE, panelX1, panelY, 0, 0.75, 0.75, 300, 150)
+    love.graphics.draw(UI_PANEL_IMAGE, panelX2, panelY, 0, 0.75, 0.75, 300, 150)
 
+    love.graphics.setColor(0, 0, 0)
+    love.graphics.print("Apartments", panelX1 - 210, panelY - 100, 0, 0.5, 0.5)
+    love.graphics.print("Skyscraper", panelX2 - 210, panelY - 100, 0, 0.5, 0.5)
+    love.graphics.setColor(1, 1, 1)
     return
   end
 
@@ -307,7 +327,7 @@ function love.draw()
   --love.graphics.rectangle("fill", 30, HEIGHT, 4, 4)
 
   for i = 1, #DEBUG do
-    love.graphics.print(DEBUG[i], love.graphics.getWidth() - 160, 10 + (i - 1) * 20)
+    love.graphics.print(DEBUG[i], screenWidth - 160, 10 + (i - 1) * 20)
   end
 end
 
