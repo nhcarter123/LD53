@@ -23,16 +23,18 @@ return {
       seatIndex = 1,
       emotes = {},
       height = -140,
-      happiness = 0.7,
+      happiness = 0.6,
       dialogueOpen = 0,
       waitingCount = 0,
-      patienceInterval = 20,
+      patienceInterval = 30,
       gravityStretch = 1,
       groundedCount = 0,
       currentWalkSpeed = 0,
       hbOffset = 0,
       beenInPlaygroundCount = 0,
       deathCount = 0,
+      forgetCount = 0,
+      forgetInterval = 5
     }
 
     unit.move = function(self, x, y)
@@ -81,7 +83,7 @@ return {
       end
 
       --if self.hallway.isPlayground and (self.beenInPlaygroundCount < PLAYGROUND_BOREDOM_COUNT and self.happiness < 0.7) then
-      if self.hallway.isPlayground and self.happiness < 0.95 then
+      if self.hallway.isPlayground and self.happiness < 0.8 then
         return false
       end
 
@@ -206,11 +208,19 @@ return {
           removeEl(ELEVATOR.aliens, self)
           removeEl(AlienManager.aliens, self)
 
-          if TOTAL_DEATHS > GAME_OVER_DEATHS then
-
+          if TOTAL_DEATHS >= GAME_OVER_DEATHS then
+            PAUSED = true
+            GAME_OVER = true
           end
         end
       end
+
+      --if self.forgetCount > self.forgetInterval then
+      --  if self.groundedCount == 0 then
+      --    self.gotFallingReward =
+      --  end
+      --end
+      --self.forgetCount = self.forgetCount + dt
 
       for i = #self.emotes, 1, -1 do
         local emote = self.emotes[i]
@@ -239,6 +249,7 @@ return {
 
         if self.y > ELEVATOR.y then
           self.groundedCount = 0
+          self.gotFallingReward = false
           --self.vy = ELEVATOR.vy * 200
           if ELEVATOR.vy <= 0.2 then
             self.vy = ELEVATOR.vy

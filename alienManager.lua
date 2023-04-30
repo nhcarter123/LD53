@@ -3,7 +3,8 @@ return {
   spawnCount = 999,
   spawnInterval = 2,
   difficultyCount = 0,
-  difficultyIncreaseInterval = 1500000,
+  difficultyIncreaseInterval = 45,
+  spawnRateUp = 0,
   --differ
 
   update = function(self, dt)
@@ -28,11 +29,15 @@ return {
     if self.difficultyCount > self.difficultyIncreaseInterval then
       self.difficultyCount = 0
 
-      if self.spawnInterval > 1.3 then
+      if self.spawnInterval > 1 then
         self.spawnInterval = self.spawnInterval - 0.2
+
+        self.spawnRateUp = 3
       end
     end
+
     self.difficultyCount = self.difficultyCount + dt
+    self.spawnRateUp = self.spawnRateUp - dt
 
     --local mx, my = love.mouse.getPosition()
     --local wmx, wmy = cam:toWorld(mx, my)

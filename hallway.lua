@@ -29,6 +29,8 @@ return {
           self.backColor = { 0.46, 0.31, 0.51 }
         elseif self.color == 'aqua' then
           self.backColor = { 0.41, 0.59, 0.68 }
+        elseif self.color == 'pink' then
+          self.backColor = { 0.8, 0.39, 0.47 }
         else
           self.backColor = { 0.84, 0.82, 0.72 }
         end
@@ -37,12 +39,22 @@ return {
       addAlien = function(self)
         local constructor = Alien1
 
-        if self.rand > 0.75 then
-          constructor = Alien2
-        elseif self.rand > 0.5 then
-          constructor = Alien3
-        elseif self.rand > 0.25 then
-          constructor = Alien4
+        if SELECTED_LEVEL == 2 then
+          if self.rand > 0.8 then
+            constructor = Alien2
+          elseif self.rand > 0.6 then
+            constructor = Alien3
+          elseif self.rand > 0.4 then
+            constructor = Alien4
+          elseif self.rand > 0.2 then
+            constructor = Alien5
+          end
+        else
+          if self.rand > 0.66 then
+            constructor = Alien2
+          elseif self.rand > 0.33 then
+            constructor = Alien4
+          end
         end
 
         local alien = constructor.create(self.x * 1.5, self.y)
@@ -75,7 +87,7 @@ return {
 
           if played then
             alien.beenInPlaygroundCount = alien.beenInPlaygroundCount + 1
-            alien:adjustHappiness(0.1)
+            alien:adjustHappiness(0.18)
             alien:addEmote(HAPPY_IMAGE, 0)
           end
         end

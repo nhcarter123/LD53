@@ -18,9 +18,7 @@ return {
     -- Slow down elevator based on capacity
 
     unit.move = function(self, ceilingHeight, y)
-      if self.y > ceilingHeight + self.h then
-        self.vy = self.vy + y * 0.07
-      end
+      self.vy = self.vy + y * 0.07
     end
 
     unit.toggleDoor = function(self, isLeft)
@@ -89,16 +87,35 @@ return {
       --DEBUG[3] = "FloorDiff: " .. tostring(self.floorDiff)
 
       --- Stop at the ceiling
+      --if self.y < ceilingHeight + self.h then
+      --  self.vy = self.vy + dt * 12
+      --else
+      --  --- Friction
+      --  if noInputs then
+      --    --self.y = lerp(self.y, (-currentFloor + 1) * HALLWAY_HEIGHT, 4 * dt)
+      --    self.vy = lerp(self.vy, 0, dt * 3)
+      --  else
+      --    self.vy = lerp(self.vy, 0, dt * 3)
+      --  end
+      --end
+
+
+      --- Stop at the ceiling
       if self.y < ceilingHeight + self.h then
-        self.vy = self.vy + dt * 12
-      else
-        --- Friction
-        if noInputs then
-          --self.y = lerp(self.y, (-currentFloor + 1) * HALLWAY_HEIGHT, 4 * dt)
-          self.vy = lerp(self.vy, 0, dt * 3)
-        else
-          self.vy = lerp(self.vy, 0, dt * 3)
+        self.y = ceilingHeight + self.h
+
+        --- Bounce
+        if self.vy < 0 then
+          self.vy = -self.vy * 0.5
         end
+      end
+
+      --- Friction
+      if noInputs then
+        --self.y = lerp(self.y, (-currentFloor + 1) * HALLWAY_HEIGHT, 4 * dt)
+        self.vy = lerp(self.vy, 0, dt * 3)
+      else
+        self.vy = lerp(self.vy, 0, dt * 3)
       end
 
 

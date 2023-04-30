@@ -2,10 +2,11 @@ return {
     behaviors = {},
     currentBehavior = 1,
     fallingHappinessMap = {
-      yellow = 0.35,
+      yellow = 0.3,
       green = 0.1,
       purple = 0.1,
       aqua = 0.1,
+      pink = -0.3
     },
 
     init = function(self)
@@ -50,20 +51,39 @@ return {
           rightOx = 20,
           rightOy = 20
         },
-        {
-          leftImg = ALIEN4_IMAGE,
-          leftText = "Blormas",
-          leftOx = 107/2,
-          leftOy = 147/2,
-
-          loves = false,
-
-          rightImg = ALIEN1_IMAGE,
-          rightText = "Glorbles.",
-          rightOx = 107/2,
-          rightOy = 147/2,
-        }
       }
+
+      if SELECTED_LEVEL == 2 then
+        table.insert(self.behaviors,
+            {
+              leftImg = ALIEN4_IMAGE,
+              leftText = "Blormas",
+              leftOx = 107/2,
+              leftOy = 147/2,
+
+              loves = false,
+
+              rightImg = ALIEN1_IMAGE,
+              rightText = "Glorbles.",
+              rightOx = 107/2,
+              rightOy = 147/2,
+            })
+
+        table.insert(self.behaviors,
+            {
+              leftImg = ALIEN5_IMAGE,
+              leftText = "Troogles",
+              leftOx = 107/2,
+              leftOy = 147/2,
+
+              loves = false,
+
+              rightImg = FALLING_IMAGE,
+              rightText = "falling.",
+              rightOx = 20,
+              rightOy = 20,
+            })
+      end
     end,
 
     addNewBehavior = function(self)
@@ -73,6 +93,24 @@ return {
     end,
 
     update = function(self, dt)
+
+    end,
+
+    right = function(self)
+      self.currentBehavior = self.currentBehavior + 1
+      if self.currentBehavior > #self.behaviors then
+        self.currentBehavior = 1
+      end
+      love.audio.play(BLIP_SOUND)
+
+    end,
+
+    left = function(self)
+      self.currentBehavior = self.currentBehavior - 1
+      if self.currentBehavior < 1 then
+        self.currentBehavior = #self.behaviors
+      end
+      love.audio.play(BLIP_SOUND)
 
     end,
 
@@ -88,6 +126,7 @@ return {
       else
         PAUSED = false
         self.open = false
+        self.currentBehavior = 1
       end
     end,
 
@@ -127,7 +166,8 @@ return {
       love.graphics.draw(centerImg, cx + shakeX, cy + oy + shakeY, 0, 1.5, 1.5, 27 / 2, 24 / 2)
       love.graphics.draw(behavior.rightImg, cx + spacing, cy + oy, 0, 1 * b3, 1 * b3, behavior.rightOx, behavior.rightOy)
 
-      love.graphics.setColor(0, 0, 0)
+      love.graphics.setColor(0.25, 0.25, 0.25)
+      love.graphics.print(self.currentBehavior, cx - spacing -160, cy -130, 0, 1, 1)
       love.graphics.print(behavior.leftText, cx - spacing - DEFAULT_FONT:getWidth(behavior.leftText) / 4, cy + textHeight + oy, 0, 0.5, 0.5)
       love.graphics.print(centerText, cx - DEFAULT_FONT:getWidth(centerText) / 4, cy + textHeight + oy, 0, 0.5, 0.5)
       love.graphics.print(behavior.rightText, cx + spacing - DEFAULT_FONT:getWidth(behavior.rightText) / 4, cy + textHeight + oy, 0, 0.5, 0.5)

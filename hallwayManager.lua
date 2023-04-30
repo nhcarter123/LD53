@@ -25,11 +25,15 @@ return {
         --'green',
         'yellow',
         --'yellow',
-        'purple',
         --'purple',
         'aqua',
         --'aqua',
       }
+
+      if SELECTED_LEVEL == 2 then
+        table.insert(exitColors,'purple')
+        table.insert(exitColors,'pink')
+      end
 
       shuffle(availableHallways)
 

@@ -6,6 +6,7 @@ Alien1 = require("unit/alien1")
 Alien2 = require("unit/alien2")
 Alien3 = require("unit/alien3")
 Alien4 = require("unit/alien4")
+Alien5 = require("unit/alien5")
 AlienManager = require("alienManager")
 HallwayManager = require("hallwayManager")
 BehaviorManager = require("behaviorManager")
@@ -60,6 +61,7 @@ function love.keypressed(key, scancode, isrepeat)
     if not ARE_YOU_SURE then
       PAUSED = true
       ARE_YOU_SURE = true
+      BehaviorManager.open = true
       return
     end
   end
@@ -96,9 +98,26 @@ function love.keypressed(key, scancode, isrepeat)
     return
   end
 
+  if GAME_OVER then
+    if key == "space" or key == "return" then
+      LEVEL_SELECT = true
+      GAME_OVER = false
+      love.audio.play(BLIP_SOUND)
+    end
+
+    return
+  end
+
   if ARE_YOU_SURE then
     if key == "backspace" then
       LEVEL_SELECT = true
+    end
+
+    if key == "a" or key == "left" then
+      BehaviorManager:left()
+    end
+    if key == "d" or key == "right" then
+      BehaviorManager:right()
     end
 
     if key == "space" or key == "return" or key == "escape" then
@@ -106,13 +125,18 @@ function love.keypressed(key, scancode, isrepeat)
       ARE_YOU_SURE = false
       love.audio.play(BLIP_SOUND)
     end
+
+    return
   end
 
   BehaviorManager:next()
 
-  --if key == "r" then
-  --  resetGame()
-  --end
+  if key == "r" then
+    --resetGame()
+    TOTAL_DEATHS = 3
+    GAME_OVER = true
+    PAUSED = true
+  end
 
   if key == "w" or key == "up" then
     W_IS_DOWN = true
@@ -146,8 +170,9 @@ function love.load()
   love.graphics.setDefaultFilter("nearest", "nearest", 1)
   --love.graphics.setBackgroundColor(46 / 255, 50 / 255, 35 / 255)
   love.keyboard.setKeyRepeat(true)
+  love.window.setTitle("Alien Elevator")
 
-  SOUNDTRACK_1 = love.audio.newSource("resources/sounds/track1.mp3", "stream")
+  SOUNDTRACK_1 = love.audio.newSource("resources/sounds/theme2.mp3", "stream")
   HAPPY_SOUND_1 = love.audio.newSource("resources/sounds/happy1.mp3", "static")
   HAPPY_SOUND_2 = love.audio.newSource("resources/sounds/happy2.mp3", "static")
   HAPPY_SOUND_3 = love.audio.newSource("resources/sounds/happy3.mp3", "static")
@@ -194,6 +219,7 @@ function love.load()
   ALIEN2_IMAGE = love.graphics.newImage("resources/images/alien2.png")
   ALIEN3_IMAGE = love.graphics.newImage("resources/images/alien3.png")
   ALIEN4_IMAGE = love.graphics.newImage("resources/images/alien4.png")
+  ALIEN5_IMAGE = love.graphics.newImage("resources/images/alien5.png")
   CLOCK_IMAGE = love.graphics.newImage("resources/images/clock.png")
   ELEVATOR_IMAGE = love.graphics.newImage("resources/images/elevator_back.png")
   DIR_IMAGE = love.graphics.newImage("resources/images/dir.png")
@@ -336,19 +362,51 @@ function love.draw()
     drawPanel(screenWidth, screenHeight, SELECTED_LEVEL == 1, -270, "Apartments", {
       "- 8x floors",
       "- 1x playground",
+      "- 3x aliens",
     })
     drawPanel(screenWidth, screenHeight, SELECTED_LEVEL == 2, 270, "Skyscraper", {
       "- 20x floors",
       "- 2x playground",
+      "- 5x aliens",
     })
     return
   end
 
-  cam:draw(drawCameraStuff)
+  if GAME_OVER then
+    local title = "Apartments"
+    if SELECTED_LEVEL == 1 then
+      title = "Skyscraper"
+    end
 
-  if PAUSED then
-    BehaviorManager:draw()
+    love.graphics.draw(UI_PANEL_IMAGE, screenWidth / 2, screenHeight / 2, 0, 1, 1, 300, 150)
+    love.graphics.setColor(0.25, 0.25, 0.25)
+    love.graphics.print(title, round(screenWidth / 2) - 200, round(screenHeight / 2) - 80, 0, 1, 1)
+    love.graphics.setColor(1, 1, 1)
+
+    local xx = -220
+
+    --- Draw UI
+    love.graphics.draw(HAPPY_IMAGE, screenWidth / 2 + 20 + xx, screenHeight / 2 + 20, 0, 1, 1)
+    love.graphics.draw(BEMUSED_IMAGE, screenWidth / 2 + 120 + xx, screenHeight / 2 + 20, 0, 1, 1)
+    love.graphics.draw(ANGRY_IMAGE, screenWidth / 2 + 220 + xx, screenHeight / 2 + 20, 0, 1, 1)
+    love.graphics.draw(SKULL_IMAGE, screenWidth / 2 + 320 + xx, screenHeight / 2 + 20, 0, 1, 1)
+    --- Text
+    love.graphics.setColor(0.2, 0.2, 0.2)
+    love.graphics.print(TOTAL_SMILIES, screenWidth / 2 + 65 + 2 + xx, screenHeight / 2 + 28 + 2, 0, 0.5, 0.5)
+    love.graphics.print(TOTAL_BEMUSED, screenWidth / 2 + 165 + 2 + xx, screenHeight / 2 + 28 + 2, 0, 0.5, 0.5)
+    love.graphics.print(TOTAL_FROWNIES, screenWidth / 2 + 265 + 2 + xx, screenHeight / 2 + 28 + 2, 0, 0.5, 0.5)
+    love.graphics.print(TOTAL_DEATHS .. " / " .. tostring(GAME_OVER_DEATHS), screenWidth / 2 + 365 + 2 + xx, screenHeight / 2 + 28 + 2, 0, 0.5, 0.5)
+
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.print(TOTAL_SMILIES, screenWidth / 2 + 65 + xx, screenHeight / 2 + 28, 0, 0.5, 0.5)
+    love.graphics.print(TOTAL_BEMUSED, screenWidth / 2 + 165 + xx, screenHeight / 2 + 28, 0, 0.5, 0.5)
+    love.graphics.print(TOTAL_FROWNIES, screenWidth / 2 + 265 + xx, screenHeight / 2 + 28, 0, 0.5, 0.5)
+    love.graphics.print(tostring(TOTAL_DEATHS) .. " / " .. tostring(GAME_OVER_DEATHS), screenWidth / 2 + 365 + xx, screenHeight / 2 + 28, 0, 0.5, 0.5)
+
+    return
   end
+
+  cam:draw(drawCameraStuff)
 
   --- Draw UI
   love.graphics.draw(HAPPY_IMAGE, 20, 20, 0, 1, 1)
@@ -368,6 +426,26 @@ function love.draw()
   love.graphics.print(TOTAL_FROWNIES, 265, 28, 0, 0.5, 0.5)
   love.graphics.print(tostring(TOTAL_DEATHS) .. " / " .. tostring(GAME_OVER_DEATHS), 365, 28, 0, 0.5, 0.5)
 
+  if AlienManager.spawnRateUp > 0 then
+    love.graphics.setColor(1, 1, 1, AlienManager.spawnRateUp * 1.3)
+    love.graphics.print("Difficulty Up", screenWidth / 2 - DEFAULT_FONT:getWidth("Difficulty Up") / 2, screenHeight / 2 + AlienManager.spawnRateUp * 20 - 20, 0, 1, 1)
+    love.graphics.setColor(1, 1, 1)
+  end
+
+  if ARE_YOU_SURE then
+    love.graphics.setColor(0.3, 0.3, 0.3, 0.85)
+    love.graphics.rectangle("fill", 0, 0, screenWidth, screenHeight)
+
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.print("Paused", screenWidth / 2 - DEFAULT_FONT:getWidth("Paused") / 2, screenHeight / 2 - 240, 0, 1, 1)
+    love.graphics.print("Exit [backspace]", screenWidth / 2 - 0.5 * DEFAULT_FONT:getWidth("Exit [backspace]") / 2 - 110, screenHeight / 2 + 180, 0, 0.5, 0.5)
+    love.graphics.print("Resume [space]", screenWidth / 2 - 0.5 * DEFAULT_FONT:getWidth("Resume [space]") / 2 + 110, screenHeight / 2 + 180, 0, 0.5, 0.5)
+  end
+
+  if PAUSED then
+    BehaviorManager:draw()
+  end
+
   --for i = 1, 100 do
   --  BALLS[i]:draw()
   --end
@@ -380,16 +458,6 @@ function love.draw()
   --love.graphics.rectangle('fill', WIDTH / 2, HEIGHT / 2, 400, 200)
 
   --love.graphics.rectangle("fill", 30, HEIGHT, 4, 4)
-
-  if ARE_YOU_SURE then
-    love.graphics.setColor(0.3, 0.3, 0.3, 0.85)
-    love.graphics.rectangle("fill", 0, 0, screenWidth, screenHeight)
-
-    love.graphics.setColor(1, 1, 1)
-    love.graphics.print("Paused", screenWidth / 2 - DEFAULT_FONT:getWidth("Paused") / 2, screenHeight / 2 - 180, 0, 1, 1)
-    love.graphics.print("Exit [backspace]", screenWidth / 2 - 0.5 * DEFAULT_FONT:getWidth("Exit [backspace]") / 2 - 110, screenHeight / 2 + 180, 0, 0.5, 0.5)
-    love.graphics.print("Resume [space]", screenWidth / 2 - 0.5 * DEFAULT_FONT:getWidth("Resume [space]") / 2 + 110, screenHeight / 2 + 180, 0, 0.5, 0.5)
-  end
 
   for i = 1, #DEBUG do
     love.graphics.print(DEBUG[i], screenWidth - 160, 10 + (i - 1) * 20)
