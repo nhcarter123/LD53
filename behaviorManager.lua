@@ -80,7 +80,7 @@ return {
       local oy = -30
       --local b1 = math.sin(time * 3 + 3) * 8
       love.graphics.setColor(0, 0, 0, 0.2)
-      love.graphics.draw(UI_PANEL_IMAGE, cx + 15, cy + 25, 0, 1, 1, 300, 150)
+      love.graphics.draw(UI_PANEL_IMAGE, cx - 12, cy + 12, 0, 1, 1, 300, 150)
       love.graphics.setColor(1, 1, 1)
       love.graphics.draw(UI_PANEL_IMAGE, cx, cy, 0, 1, 1, 300, 150)
 

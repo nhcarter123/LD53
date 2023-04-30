@@ -34,10 +34,10 @@ function love.textinput(t)
   --end
 end
 
+W_HELD = 0
+S_HELD = 0
 W_IS_DOWN = false
 S_IS_DOWN = false
-A_IS_DOWN = false
-D_IS_DOWN = false
 
 function love.keypressed(key, scancode, isrepeat)
   if key == "escape" then
@@ -51,41 +51,36 @@ function love.keypressed(key, scancode, isrepeat)
   if key == "w" then
     W_IS_DOWN = true
   end
-  if key == "a" then
-    A_IS_DOWN = true
-  end
   if key == "s" then
     S_IS_DOWN = true
   end
-  if key == "d" then
-    D_IS_DOWN = true
-  end
+
+  --if key == "a" then
+  --  ELEVATOR:toggleDoor(true)
+  --end
+  --if key == "d" then
+  --  ELEVATOR:toggleDoor(false)
+  --end
 end
 
 function love.keyreleased(key, scancode, isrepeat)
   if key == "w" then
     W_IS_DOWN = false
   end
-  if key == "a" then
-    A_IS_DOWN = false
-  end
   if key == "s" then
     S_IS_DOWN = false
-  end
-  if key == "d" then
-    D_IS_DOWN = false
   end
 end
 
 function love.mousereleased(x, y, button, istouch)
 end
 
-FLOOR_COUNT = 10
+FLOOR_COUNT = 20
 HALLWAY_HEIGHT = 190
 PAUSED = true
 
 function love.load()
-  --math.randomseed(os.time())
+  math.randomseed(os.time())
   --love.graphics.setDefaultFilter("linear", "linear", 4)
   love.graphics.setDefaultFilter("nearest", "nearest", 1)
   love.graphics.setBackgroundColor(46 / 255, 50 / 255, 35 / 255)
@@ -145,10 +140,18 @@ function love.update(dt)
 
     local yVel = 0
     if W_IS_DOWN then
-      yVel = -1
+      yVel = -1 - W_HELD * 1.2
+      W_HELD = W_HELD + dt
+      S_HELD = 0
+    else
+      W_HELD = 0
     end
     if S_IS_DOWN then
-      yVel = 1
+      yVel = 1 + S_HELD * 1.2
+      S_HELD = S_HELD + dt
+      W_HELD = 0
+    else
+      S_HELD = 0
     end
 
     ELEVATOR:move(0, yVel)

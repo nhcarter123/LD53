@@ -1,7 +1,8 @@
 WAIT_SPACING = 50
 ELEVATOR_ENTRY_DIST = 200
 EXIT_DIST = 600
-ELEVATOR_ACCEPTABLE_DIFF = 15
+ELEVATOR_ACCEPTABLE_DIFF = 0.1
+ELEVATOR_WIDTH = 320
 
 return {
   create = function(x, y, img)
@@ -16,11 +17,13 @@ return {
       seatIndex = 1,
       emotes = {},
       height = -140,
-      happiness = 0.5,
+      happiness = 0.8,
       dialogueOpen = 0,
       waitingCount = 0,
-      patienceInterval = 60,
-      gravityStretch = 1
+      patienceInterval = 30,
+      gravityStretch = 1,
+      groundedCount = 0,
+      currentWalkSpeed = 0
     }
 
     unit.move = function(self, x, y)
@@ -28,10 +31,15 @@ return {
       self.y = self.y + y
     end
 
-    unit.walkTo = function(self, dt, x)
+    unit.walkTo = function(self, dt, x, multi)
       --local walkSpeed = math.abs(70 * dt * (1 + math.sin(time * 8) / 1))
-      local walkSpeed = math.abs(130 * dt)
-      self.x = self.x + clamp(-walkSpeed, x - self.x, walkSpeed)
+      local walkSpeed = math.abs(120 * dt * multi)
+      self.currentWalkSpeed = lerp(self.currentWalkSpeed, walkSpeed, 2 * dt)
+      self.x = self.x + clamp(-self.currentWalkSpeed, x - self.x, self.currentWalkSpeed)
+
+      --if not onElevator and ELEVATOR.floorDiff > ELEVATOR_ACCEPTABLE_DIFF and self.x < 200 then
+      --  self.x = 200
+      --end
 
       if x - self.x < 0 then
         self.dir = -1
@@ -41,18 +49,38 @@ return {
     end
 
     unit.isElevatorAccessible = function(self)
-      if self.hallway.floor == ELEVATOR.floor and
-          ELEVATOR.floorDiff < ELEVATOR_ACCEPTABLE_DIFF and
-          math.abs(ELEVATOR.vy) < 1
+      if self.x > ELEVATOR.x then
+        if not ELEVATOR.rightDoorOpen then
+          return false
+        end
+      else
+        if not ELEVATOR.leftDoorOpen then
+          return false
+        end
+      end
+
+      if self.hallway.floor == ELEVATOR.floor
+          --ELEVATOR.floorDiff < ELEVATOR_ACCEPTABLE_DIFF
+          --math.abs(ELEVATOR.vy) < 10
       then
         return true
       end
     end
 
     unit.isExitAccessible = function(self, hallway)
-      if hallway.color == self.color and
-          ELEVATOR.floorDiff < ELEVATOR_ACCEPTABLE_DIFF and
-          math.abs(ELEVATOR.vy) < 1
+      if ELEVATOR.x < hallway.x then
+        if not ELEVATOR.rightDoorOpen then
+          return false
+        end
+      else
+        if not ELEVATOR.leftDoorOpen then
+          return false
+        end
+      end
+
+      if hallway.color == self.color
+          --ELEVATOR.floorDiff < ELEVATOR_ACCEPTABLE_DIFF
+          --math.abs(ELEVATOR.vy) < 1
       then
         return true
       end
@@ -79,6 +107,14 @@ return {
       })
     end
 
+    unit.applySeenReward = function(self)
+      if not self.seenReward then
+        self.happiness = self.happiness + 0.2
+        self:addEmote(HAPPY_IMAGE, 0)
+        self.seenReward = true
+      end
+    end
+
     unit.update = function(self, dt)
       --self.y = self.y + 0.2;
       --self.x = self.x + self.vx
@@ -101,16 +137,27 @@ return {
       if self.onElevator then
         --self.y = ELEVATOR.y
 
-        self.vy = self.vy + dt * 500
+        self.vy = self.vy + dt * 320
         self.y = self.y + self.vy * dt
 
         if self.y > ELEVATOR.y then
+          self.groundedCount = 0
           --self.vy = ELEVATOR.vy * 200
           if ELEVATOR.vy <= 0.2 then
-            self.vy = 0
+            self.vy = ELEVATOR.vy
           end
 
           self.y = ELEVATOR.y
+        else
+          self.groundedCount = self.groundedCount + dt
+          if self.groundedCount > 2 and not self.gotFallingReward then
+            if self.color == 'yellow' then
+              self.gotFallingReward = true
+              self.happiness = self.happiness + 0.2
+              self:addEmote(FALLING_IMAGE, 0)
+              self:addEmote(HAPPY_IMAGE, 1)
+            end
+          end
         end
 
         --if self.vy > 0 then
@@ -139,11 +186,10 @@ return {
         end
 
         if target then
-          self:walkTo(dt, target.x)
+          self:walkTo(dt, target.x, 8)
         else
-          local elevatorWidth = 240
-          local spacing = elevatorWidth / #ELEVATOR.aliens
-          self:walkTo(dt, ELEVATOR.x - elevatorWidth / 2 + self.seatIndex * spacing)
+          local spacing = ELEVATOR_WIDTH / #ELEVATOR.aliens
+          self:walkTo(dt, ELEVATOR.x - ELEVATOR_WIDTH / 2 + (self.seatIndex - 0.5) * spacing, 1)
         end
 
         if math.abs(self.x) > ELEVATOR_ENTRY_DIST then
@@ -160,7 +206,7 @@ return {
         self.y = self.hallway.y
 
         if self.hallway.isExit then
-          self:walkTo(dt, self.x * 4)
+          self:walkTo(dt, self.x * 4, 1)
           --- Delete if exited
           if math.abs(self.x) > EXIT_DIST then
             removeEl(AlienManager.aliens)
@@ -170,16 +216,27 @@ return {
           local canWalkOnElevator = self:isElevatorAccessible()
 
           if canWalkOnElevator then
-            self:walkTo(dt, 0)
+            self:walkTo(dt, 0, 8)
           else
-            self:walkTo(dt, self.hallway.doorX - (self.seatIndex - 1) * WAIT_SPACING)
+            self:walkTo(dt, self.hallway.doorX - (self.seatIndex - 1) * WAIT_SPACING, 1)
           end
 
-          if math.abs(self.x) < ELEVATOR_ENTRY_DIST then
+          if math.abs(self.x) < ELEVATOR_ENTRY_DIST and ELEVATOR.floorDiff < ELEVATOR_ACCEPTABLE_DIFF then
+            --- Enter the elevator
             removeEl(self.hallway.aliens, self)
             self.hallway = nil
             self.onElevator = true
             table.insert(ELEVATOR.aliens, self)
+
+            for i = 1, #ELEVATOR.aliens do
+              local alien = ELEVATOR.aliens[i]
+              if alien.color == 'green' and self.color == 'yellow' then
+                self:applySeenReward()
+              end
+              if alien.color == 'yellow' and self.color == 'green' then
+                alien:applySeenReward()
+              end
+            end
           end
         end
       end

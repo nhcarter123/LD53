@@ -211,6 +211,16 @@ function contains(table, value)
   return false
 end
 
+function hasColor(table, color)
+  for i = 1, #table do
+    if table[i].color == color then
+      return true
+    end
+  end
+
+  return false
+end
+
 function merge(table1, table2)
   local merged = {}
   for i = 1, #table1 do

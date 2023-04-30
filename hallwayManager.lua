@@ -22,11 +22,11 @@ return {
 
       local exitColors = {
         'green',
-        --'green',
+        'green',
         'yellow',
-        --'yellow',
+        'yellow',
         'purple',
-        --'purple',
+        'purple',
       }
 
       shuffle(availableHallways)
