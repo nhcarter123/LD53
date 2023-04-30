@@ -2,7 +2,7 @@ return {
     floors = {},
 
     init = function(self)
-      local spacingX = 500
+      local spacingX = 490
 
       local availableHallways = {}
 

@@ -99,7 +99,7 @@ return {
       local b2 = 1 + math.sin(time * 2 + 1) / 20
       local b3 = 1 + math.sin(time * 2 + 2) / 20
       love.graphics.setColor(0, 0, 0, 0.2)
-      love.graphics.draw(UI_PANEL_IMAGE, cx - 12, cy + 12, 0, 1, 1, 300, 150)
+      love.graphics.draw(UI_PANEL_IMAGE, cx - 8, cy + 8, 0, 1, 1, 300, 150)
       love.graphics.setColor(1, 1, 1)
       love.graphics.draw(UI_PANEL_IMAGE, cx, cy, 0, 1, 1, 300, 150)
 

@@ -11,11 +11,15 @@ HallwayManager = require("hallwayManager")
 BehaviorManager = require("behaviorManager")
 Hallway = require("hallway")
 
+StarShader = require("shaders/starShader")
+
+
 time = 0
 
 hud = {}
 TABS = {}
 DEBUG = {}
+SPLASH = true
 
 WIDTH = 1280
 HEIGHT = 720
@@ -49,6 +53,7 @@ function love.keypressed(key, scancode, isrepeat)
 
   if key == "space" then
     BehaviorManager:next()
+    SPLASH = false
   end
 
   if key == "w" then
@@ -86,7 +91,7 @@ function love.load()
   math.randomseed(os.time())
   --love.graphics.setDefaultFilter("linear", "linear", 4)
   love.graphics.setDefaultFilter("nearest", "nearest", 1)
-  love.graphics.setBackgroundColor(46 / 255, 50 / 255, 35 / 255)
+  --love.graphics.setBackgroundColor(46 / 255, 50 / 255, 35 / 255)
   love.keyboard.setKeyRepeat(true)
 
   SOUNDTRACK_1 = love.audio.newSource("resources/sounds/track1.mp3", "stream")
@@ -113,13 +118,16 @@ function love.load()
 
   love.graphics.setFont(DEFAULT_FONT)
 
-  ---- Units
-  HALLWAY_DETAIL_IMAGE = love.graphics.newImage("resources/images/hallway.png")
+  EMPTY_TEXTURE_IMAGE = love.graphics.newImage("resources/images/empty_tex.png")
+  SPLASH_IMAGE = love.graphics.newImage("resources/images/splash.png")
+  HALLWAY_IMAGE = love.graphics.newImage("resources/images/hallway.png")
+  HALLWAY_2_IMAGE = love.graphics.newImage("resources/images/hallway2.png")
   PLAYGROUND_IMAGE = love.graphics.newImage("resources/images/playground.png")
   --HALLWAY_IMAGE = love.graphics.newImage("resources/images/hallway.png")
   --HALLWAY_G_IMAGE = love.graphics.newImage("resources/images/hallway_g.png")
   --HALLWAY_Y_IMAGE = love.graphics.newImage("resources/images/hallway_y.png")
   --HALLWAY_P_IMAGE = love.graphics.newImage("resources/images/hallway_p.png")
+  ELEVATOR_SHAFT_IMAGE = love.graphics.newImage("resources/images/elevator_shaft.png")
   ALIEN1_IMAGE = love.graphics.newImage("resources/images/alien1.png")
   ALIEN2_IMAGE = love.graphics.newImage("resources/images/alien2.png")
   ALIEN3_IMAGE = love.graphics.newImage("resources/images/alien3.png")
@@ -196,10 +204,28 @@ function love.update(dt)
     --end
   end
 
+  local camX, camY = cam:getPosition()
+  StarShader:send("time", time)
+  StarShader:send("zoom", cam:getScale())
+  StarShader:send("position", { camX, camY })
+  StarShader:send("slope", love.graphics.getWidth() / love.graphics.getHeight())
+
   DEBUG[1] = "Current FPS: " .. tostring(love.timer.getFPS())
 end
 
 local function drawCameraStuff(l, t, w, h)
+  local currentX, currentY = cam:getPosition()
+  local sx, sy, sw, sh = love.graphics.getScissor()
+  local buildingHeight = HALLWAY_HEIGHT * (FLOOR_COUNT)
+  love.graphics.setScissor(0, -currentY - buildingHeight + (HALLWAY_HEIGHT * 2) - 30, love.graphics.getWidth(), buildingHeight)
+
+  for i = 1, 1 + FLOOR_COUNT / 2 do
+    local yOffset = -HALLWAY_HEIGHT * (i - 1.5) * 2 + ELEVATOR.y / 6
+    love.graphics.draw(ELEVATOR_SHAFT_IMAGE, 0, yOffset, 0, 1, 1, 390/2, 380/2)
+  end
+  love.graphics.setScissor(sx, sy, sw, sh)
+
+
   --drawHallways(FLOOR_COUNT)
   HallwayManager:draw()
 
@@ -209,6 +235,10 @@ local function drawCameraStuff(l, t, w, h)
 end
 
 function love.draw()
+  love.graphics.setShader(StarShader)
+  love.graphics.draw(EMPTY_TEXTURE_IMAGE, 0, 0, 0, love.graphics.getWidth(),  love.graphics.getHeight())
+  love.graphics.setShader()
+
   --actual_width = love.graphics.getWidth()
   --actual_height = love.graphics.getHeight()
   --desired_width = 1280
@@ -223,6 +253,12 @@ function love.draw()
   --love.graphics.scale(scale, scale)
   --
   --cam:setScale(scale)
+
+  if SPLASH then
+    love.graphics.draw(SPLASH_IMAGE, 0, 0, 0, 2, 2)
+    return
+  end
+
   cam:draw(drawCameraStuff)
 
   if PAUSED then
@@ -237,7 +273,6 @@ function love.draw()
   -- Loves/Hates other alien type
   -- Loves/Hates crowds
   -- Loves/Hates waiting
-
 
   --love.graphics.rectangle('fill', WIDTH / 2, HEIGHT / 2, 400, 200)
 

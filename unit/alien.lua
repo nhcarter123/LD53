@@ -24,7 +24,7 @@ return {
       happiness = 0.5,
       dialogueOpen = 0,
       waitingCount = 0,
-      patienceInterval = 40,
+      patienceInterval = 30,
       gravityStretch = 1,
       groundedCount = 0,
       currentWalkSpeed = 0,
@@ -155,6 +155,10 @@ return {
 
     unit.adjustHappiness = function(self, inc)
       self.happiness = clamp(0, self.happiness + inc, 1)
+
+      if self.happiness == 0 then
+        self.dead = true
+      end
     end
 
     unit.applySeenReward = function(self, isGood)
@@ -324,7 +328,7 @@ return {
         self:addEmote(CLOCK_IMAGE, 0)
         self:addEmote(ANGRY_IMAGE, 1)
         self.waitingCount = 0
-        self:adjustHappiness(-0.3)
+        self:adjustHappiness(-0.33)
       end
 
       self.breathY = 1 + 8 * math.sin(time * 2 + self.breathOffset) / self.height
@@ -352,9 +356,9 @@ return {
 
       local healthBarWidth = 50
       love.graphics.setColor(0.1, 0.1, 0.1)
-      love.graphics.rectangle("fill", self.x - healthBarWidth / 2 - 2, self.y + 10 + self.hbOffset - 2, healthBarWidth + 4, 8)
+      love.graphics.rectangle("fill", self.x - healthBarWidth / 2 - 2, self.y + 5 + self.hbOffset - 2, healthBarWidth + 4, 8)
       love.graphics.setColor(1 - self.happiness, self.happiness, 0)
-      love.graphics.rectangle("fill", self.x - healthBarWidth / 2, self.y + 10 + self.hbOffset, healthBarWidth * self.happiness, 4)
+      love.graphics.rectangle("fill", self.x - healthBarWidth / 2, self.y + 5 + self.hbOffset, healthBarWidth * self.happiness, 4)
       love.graphics.setColor(1, 1, 1)
 
       --love.graphics.print(self.happiness, self.x, self.y + 25)

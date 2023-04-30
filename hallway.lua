@@ -3,7 +3,7 @@ HALLWAY_MAX_CAPACITY = 8
 return {
   create = function(x, y, floor)
     return {
-      img = HALLWAY_DETAIL_IMAGE,
+      img = HALLWAY_IMAGE,
       x = x,
       y = y,
       doorX = x / 2,
@@ -14,6 +14,10 @@ return {
       playgroundPlayInterval = 5,
 
       init = function(self)
+        if math.random() > 0.5 then
+          self.img = HALLWAY_2_IMAGE
+        end
+
         if self.isPlayground then
           self.img = PLAYGROUND_IMAGE
           self.backColor = { 0.7, 0.54, 0.35 }
