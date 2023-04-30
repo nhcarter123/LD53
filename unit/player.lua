@@ -36,8 +36,8 @@ return {
       --self.x = self.x + self.vx
       --love.audio.setPosition(self.x, self.y, 0)
 
-      self.leftDoorOpen = love.keyboard.isDown("a")
-      self.rightDoorOpen = love.keyboard.isDown("d")
+      self.leftDoorOpen = love.keyboard.isDown("a") or love.keyboard.isDown("left")
+      self.rightDoorOpen = love.keyboard.isDown("d") or love.keyboard.isDown("right")
 
       if (self.leftDoorOpen and not self.wasLeftDown) or (self.rightDoorOpen and not self.wasRightDown) then
         love.audio.play(OPEN_SOUND)

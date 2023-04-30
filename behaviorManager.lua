@@ -2,10 +2,14 @@ return {
     behaviors = {},
     currentBehavior = 1,
     fallingHappinessMap = {
-      yellow = 0.35
+      yellow = 0.35,
+      green = 0.1,
+      purple = 0.1,
+      aqua = 0.1,
     },
 
     init = function(self)
+      self.currentBehavior = 1
       self.behaviors = {
         {
           leftImg = ALIEN1_IMAGE,
@@ -77,15 +81,18 @@ return {
         return
       end
 
+      love.audio.play(BLIP_SOUND)
+
       if self.currentBehavior < #self.behaviors then
         self.currentBehavior = self.currentBehavior + 1
       else
         PAUSED = false
+        self.open = false
       end
     end,
 
     draw = function(self)
-      if self.currentBehavior > #self.behaviors then
+      if self.currentBehavior > #self.behaviors or not self.open then
         return
       end
 

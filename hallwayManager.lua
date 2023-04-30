@@ -32,8 +32,11 @@ return {
       }
 
       shuffle(availableHallways)
-      local playground = table.remove(availableHallways, #availableHallways)
-      playground.isPlayground = true
+
+      for i = 1, PLAYGROUND_COUNT do
+        local playground = table.remove(availableHallways, #availableHallways)
+        playground.isPlayground = true
+      end
 
       for i = 1, #exitColors do
         local targetHallway = table.remove(availableHallways, #availableHallways)

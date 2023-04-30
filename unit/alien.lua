@@ -3,10 +3,12 @@ ELEVATOR_ENTRY_DIST = 200
 EXIT_DIST = 800
 ELEVATOR_ACCEPTABLE_DIFF = 0.5
 ELEVATOR_WIDTH = 320
+TOTAL_DEATHS = 0
 TOTAL_FROWNIES = 0
 TOTAL_BEMUSED = 0
 TOTAL_SMILIES = 0
 PLAYGROUND_BOREDOM_COUNT = 3
+GAME_OVER_DEATHS = 3
 
 return {
   create = function(x, y, img)
@@ -24,11 +26,11 @@ return {
       happiness = 0.7,
       dialogueOpen = 0,
       waitingCount = 0,
-      patienceInterval = 30,
+      patienceInterval = 20,
       gravityStretch = 1,
       groundedCount = 0,
       currentWalkSpeed = 0,
-      hbOffset = math.random() * 10,
+      hbOffset = 0,
       beenInPlaygroundCount = 0,
       deathCount = 0,
     }
@@ -79,7 +81,7 @@ return {
       end
 
       --if self.hallway.isPlayground and (self.beenInPlaygroundCount < PLAYGROUND_BOREDOM_COUNT and self.happiness < 0.7) then
-      if self.hallway.isPlayground and self.happiness < 0.7 then
+      if self.hallway.isPlayground and self.happiness < 0.95 then
         return false
       end
 
@@ -107,7 +109,7 @@ return {
       end
 
       --if hallway.isPlayground and (self.beenInPlaygroundCount < PLAYGROUND_BOREDOM_COUNT and self.happiness < 0.7) then
-      if hallway.isPlayground and self.happiness < 0.7 then
+      if hallway.isPlayground and self.happiness < 0.8 then
         return true
       end
 
@@ -127,6 +129,7 @@ return {
         self.happinessImg = HAPPY_IMAGE
         TOTAL_SMILIES = TOTAL_SMILIES + 1
       elseif self.happiness > 0.33 then
+        playRandomBemusedNoise()
         self.happinessImg = BEMUSED_IMAGE
         TOTAL_BEMUSED = TOTAL_BEMUSED + 1
       else
@@ -145,6 +148,8 @@ return {
         playRandomAngryNoise()
       elseif img == HAPPY_IMAGE then
         playRandomHappyNoise()
+      elseif img == BEMUSED_IMAGE then
+        playRandomBemusedNoise()
       end
 
       table.insert(self.emotes, {
@@ -164,7 +169,9 @@ return {
       self.happiness = clamp(0, self.happiness + inc, 1)
 
       if self.happiness == 0 then
-        self.deathCount = 2
+        self.deathCount = 3
+        self:addEmote(SKULL_IMAGE, 1)
+        playRandomDeathNoise()
       end
     end
 
@@ -193,8 +200,14 @@ return {
           --- Destroy this alien
           if self.hallway then
             removeEl(self.hallway.aliens, self)
-            removeEl(ELEVATOR.aliens, self)
-            removeEl(AlienManager.aliens, self)
+          end
+
+          TOTAL_DEATHS = TOTAL_DEATHS + 1
+          removeEl(ELEVATOR.aliens, self)
+          removeEl(AlienManager.aliens, self)
+
+          if TOTAL_DEATHS > GAME_OVER_DEATHS then
+
           end
         end
       end
@@ -234,16 +247,16 @@ return {
           self.y = ELEVATOR.y
         else
           self.groundedCount = self.groundedCount + dt
-          if self.groundedCount > 2 and not self.gotFallingReward then
+          if self.groundedCount > 1.5 and not self.gotFallingReward then
             local happinessInc = BehaviorManager.fallingHappinessMap[self.color]
             if happinessInc ~= nil then
               self.gotFallingReward = true
               self:adjustHappiness(happinessInc)
               self:addEmote(FALLING_IMAGE, 0)
               if happinessInc > 0 then
-                self:addEmote(HAPPY_IMAGE, 1)
+                self:addEmote(HAPPY_IMAGE, 0.7)
               else
-                self:addEmote(ANGRY_IMAGE, 1)
+                self:addEmote(ANGRY_IMAGE, 0.7)
               end
             end
           end
@@ -318,7 +331,7 @@ return {
             if self.hallway.isPlayground then
               self:walkTo(dt, 1.2 * self.hallway.doorX + sign(self.hallway.doorX) * (self.seatIndex - 1) * 450 / #self.hallway.aliens, 1)
             else
-              self:walkTo(dt, self.hallway.doorX - (self.seatIndex - 1) * WAIT_SPACING, 1)
+              self:walkTo(dt, self.hallway.doorX + sign(self.hallway.doorX) * (self.seatIndex - 1) * WAIT_SPACING, 1)
             end
           end
 
@@ -395,10 +408,11 @@ return {
       end
 
       local healthBarWidth = 50
+      local hbyy = (self.seatIndex % 2) * 9
       love.graphics.setColor(0.1, 0.1, 0.1)
-      love.graphics.rectangle("fill", self.x - healthBarWidth / 2 - 2, self.y + self.hbOffset - 2, healthBarWidth + 4, 8)
+      love.graphics.rectangle("fill", self.x - healthBarWidth / 2 - 2, self.y + self.hbOffset - 2 + hbyy, healthBarWidth + 4, 8)
       love.graphics.setColor(1 - self.happiness, self.happiness, 0)
-      love.graphics.rectangle("fill", self.x - healthBarWidth / 2, self.y + self.hbOffset, healthBarWidth * self.happiness, 4)
+      love.graphics.rectangle("fill", self.x - healthBarWidth / 2, self.y + self.hbOffset + hbyy, healthBarWidth * self.happiness, 4)
       love.graphics.setColor(1, 1, 1)
 
       --love.graphics.print(self.happiness, self.x, self.y + 25)

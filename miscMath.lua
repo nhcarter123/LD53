@@ -252,6 +252,35 @@ function playRandomAngryNoise()
   end
 end
 
+function playRandomDeathNoise()
+  local rand = math.random()
+  if rand > 0.66 then
+    love.audio.play(DEATH_SOUND_1)
+  elseif rand > 0.33 then
+    love.audio.play(DEATH_SOUND_2)
+  else
+    love.audio.play(DEATH_SOUND_3)
+  end
+end
+
+
+function playRandomBemusedNoise()
+  local rand = math.random()
+  if rand > 0.833 then
+    love.audio.play(BEMUSED_SOUND_6)
+  elseif rand > 0.666 then
+    love.audio.play(BEMUSED_SOUND_5)
+  elseif rand > 0.50 then
+    love.audio.play(BEMUSED_SOUND_4)
+  elseif rand > 0.33 then
+    love.audio.play(BEMUSED_SOUND_3)
+  elseif rand > 0.166 then
+    love.audio.play(BEMUSED_SOUND_2)
+  else
+    love.audio.play(BEMUSED_SOUND_1)
+  end
+end
+
 function playRandomHappyNoise()
   local rand = math.random()
   if rand > 0.8 then
