@@ -159,7 +159,7 @@ function love.mousereleased(x, y, button, istouch)
 end
 
 GAME_MODE = 1
-FLOOR_COUNT = 10
+FLOOR_COUNT = 12
 PLAYGROUND_COUNT = 1
 HALLWAY_HEIGHT = 190
 PAUSED = true
@@ -362,9 +362,9 @@ function love.draw()
     love.graphics.print("Endless mode", screenWidth / 2 - DEFAULT_FONT:getWidth("Endless mode") / 2, 80, 0, 1, 1)
 
     drawPanel(screenWidth, screenHeight, SELECTED_LEVEL == 1, -270, "Apartments", {
-      "- 10x floors",
+      "- 12x floors",
       "- 1x playground",
-      "- 3x aliens",
+      "- 4x aliens",
     })
     drawPanel(screenWidth, screenHeight, SELECTED_LEVEL == 2, 270, "Skyscraper", {
       "- 16x floors",
@@ -479,13 +479,13 @@ end
 
 function resetGame()
   if SELECTED_LEVEL == 1 then
-    FLOOR_COUNT = 8
+    FLOOR_COUNT = 128
     PLAYGROUND_COUNT = 1
     AlienManager.spawnInterval = 1.8
   else
     FLOOR_COUNT = 16
     PLAYGROUND_COUNT = 2
-    AlienManager.spawnInterval = 2.6
+    AlienManager.spawnInterval = 3.2
   end
 
   BehaviorManager.open = true
