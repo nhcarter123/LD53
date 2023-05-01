@@ -3,6 +3,7 @@ return {
 
     init = function(self)
       local spacingX = 490
+      self.floors = {}
 
       local availableHallways = {}
 
@@ -25,13 +26,13 @@ return {
         --'green',
         'yellow',
         --'yellow',
-        --'purple',
+        'purple',
         'aqua',
         --'aqua',
       }
 
       if SELECTED_LEVEL == 2 then
-        table.insert(exitColors,'purple')
+        --table.insert(exitColors,'purple')
         table.insert(exitColors,'pink')
       end
 

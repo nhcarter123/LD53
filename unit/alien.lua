@@ -309,7 +309,7 @@ return {
           self:walkTo(dt, ELEVATOR.x - ELEVATOR_WIDTH / 2 + (self.seatIndex - 0.5) * spacing, 1)
         end
 
-        if math.abs(self.x) > ELEVATOR_ENTRY_DIST then
+        if target and math.abs(self.x) > ELEVATOR_ENTRY_DIST then
           --- Unload from the elevator
           removeEl(ELEVATOR.aliens, self)
           self.hallway = target

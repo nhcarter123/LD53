@@ -1,4 +1,4 @@
-require("miscmath")
+require("miscMath")
 Gamera = require("gamera")
 Player = require("unit/player")
 Alien = require("unit/alien")
@@ -159,7 +159,7 @@ function love.mousereleased(x, y, button, istouch)
 end
 
 GAME_MODE = 1
-FLOOR_COUNT = 8
+FLOOR_COUNT = 10
 PLAYGROUND_COUNT = 1
 HALLWAY_HEIGHT = 190
 PAUSED = true
@@ -258,14 +258,14 @@ function love.update(dt)
 
     local yVel = 0
     if W_IS_DOWN then
-      yVel = -1 - W_HELD * 1.2
+      yVel = -1 - W_HELD * 1.3
       W_HELD = W_HELD + dt
       S_HELD = 0
     else
       W_HELD = 0
     end
     if S_IS_DOWN then
-      yVel = 1 + S_HELD * 1.2
+      yVel = 1 + S_HELD * 1.3
       S_HELD = S_HELD + dt
       W_HELD = 0
     else
@@ -359,13 +359,15 @@ function love.draw()
   end
 
   if LEVEL_SELECT then
+    love.graphics.print("Endless mode", screenWidth / 2 - DEFAULT_FONT:getWidth("Endless mode") / 2, 80, 0, 1, 1)
+
     drawPanel(screenWidth, screenHeight, SELECTED_LEVEL == 1, -270, "Apartments", {
-      "- 8x floors",
+      "- 10x floors",
       "- 1x playground",
       "- 3x aliens",
     })
     drawPanel(screenWidth, screenHeight, SELECTED_LEVEL == 2, 270, "Skyscraper", {
-      "- 20x floors",
+      "- 16x floors",
       "- 2x playground",
       "- 5x aliens",
     })
@@ -479,9 +481,11 @@ function resetGame()
   if SELECTED_LEVEL == 1 then
     FLOOR_COUNT = 8
     PLAYGROUND_COUNT = 1
+    AlienManager.spawnInterval = 1.8
   else
-    FLOOR_COUNT = 20
+    FLOOR_COUNT = 16
     PLAYGROUND_COUNT = 2
+    AlienManager.spawnInterval = 2.6
   end
 
   BehaviorManager.open = true

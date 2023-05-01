@@ -3,7 +3,7 @@ return {
   spawnCount = 999,
   spawnInterval = 2,
   difficultyCount = 0,
-  difficultyIncreaseInterval = 45,
+  difficultyIncreaseInterval = 50,
   spawnRateUp = 0,
   --differ
 
@@ -29,8 +29,9 @@ return {
     if self.difficultyCount > self.difficultyIncreaseInterval then
       self.difficultyCount = 0
 
-      if self.spawnInterval > 1 then
+      if self.spawnInterval > 0.6 then
         self.spawnInterval = self.spawnInterval - 0.2
+        --FLOOR_COUNT = FLOOR_COUNT + 1
 
         self.spawnRateUp = 3
       end

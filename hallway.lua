@@ -50,10 +50,12 @@ return {
             constructor = Alien5
           end
         else
-          if self.rand > 0.66 then
+          if self.rand > 0.75 then
             constructor = Alien2
-          elseif self.rand > 0.33 then
+          elseif self.rand > 0.5 then
             constructor = Alien4
+          elseif self.rand > 0.25 then
+            constructor = Alien3
           end
         end
 
