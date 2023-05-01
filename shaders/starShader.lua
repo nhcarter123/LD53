@@ -53,8 +53,6 @@ return love.graphics.newShader[[
                     0.0,_scale.y);
     }
 
-    // 2D Noise based on Morgan McGuire @morgan3d
-    // https://www.shadertoy.com/view/4dS3Wd
     float noise (in vec2 st) {
         vec2 i = floor(st);
         vec2 f = fract(st);
@@ -148,27 +146,7 @@ return love.graphics.newShader[[
 
         vec3 starColor = spectrum(fract(rndXY*ipos)) * vec3(sparkle);
 
-        //starColor *= smoothstep(1.,0.8,trans);
-        //starColor *= smoothstep(0.,0.1,trans);
-
         col += starColor;
-
-        // visualize layers
-        /*if ((uv.x > 9. || uv.y > 0.99) && ipos.y == 8.){
-            col += vec3(1.,0.,0.)*smoothstep(1.,0.5,trans);
-        }
-        if (mod(offset,3.) == 0.){
-            if (uv.x > 0.99 || uv.y > 0.99){
-                col += vec3(1.,0.,0.)*smoothstep(0.2,0.1,trans);
-            }
-        }*/
-
-        /*if ((uv.x > 9. || uv.y > 0.99) && ipos.y == 8.){
-            col += vec3(1.,0.,0.)*smoothstep(1.,0.5,trans);
-        }*/
-        /*if (offset == 1.){
-            col += starColor;
-        }*/
 
         return col;
 

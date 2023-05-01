@@ -59,7 +59,7 @@ return {
       end
 
       --- Slow down based on capacity
-      self.y = self.y + self.vy * dt * 90 * (1 - #self.aliens / 20)
+      self.y = self.y + self.vy * dt * 100 * (1 - #self.aliens / 22)
       --self.vy = self.vy * 0.98
 
       --- Stop at bottom

@@ -376,7 +376,7 @@ function love.draw()
 
   if GAME_OVER then
     local title = "Apartments"
-    if SELECTED_LEVEL == 1 then
+    if SELECTED_LEVEL == 2 then
       title = "Skyscraper"
     end
 
@@ -479,7 +479,7 @@ end
 
 function resetGame()
   if SELECTED_LEVEL == 1 then
-    FLOOR_COUNT = 128
+    FLOOR_COUNT = 12
     PLAYGROUND_COUNT = 1
     AlienManager.spawnInterval = 1.8
   else
